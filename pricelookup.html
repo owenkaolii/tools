@@ -85,7 +85,7 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 60px; }
 <header>
   <a class="home-btn" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>Tools</a>
   <div class="header-title">Pricelist</div>
-  <div class="header-sub">Jotun Decorative · Effective 15 May 2026</div>
+  <div class="header-sub">Jotun Decorative · Effective 24 Oct 2026</div>
 </header>
 
 <div class="search-bar">
@@ -96,6 +96,7 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 60px; }
   <div class="cat-tab active" onclick="filterCat('all',this)">All</div>
   <div class="cat-tab" onclick="filterCat('exterior',this)">Exterior</div>
   <div class="cat-tab" onclick="filterCat('interior',this)">Interior</div>
+  <div class="cat-tab" onclick="filterCat('oldstock',this)">Old Stock</div>
   <div class="cat-tab" onclick="filterCat('wm',this)">W&M</div>
   <div class="cat-tab" onclick="filterCat('primer',this)">Primer</div>
   <div class="cat-tab" onclick="filterCat('thinner',this)">Thinner</div>
@@ -115,15 +116,15 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 60px; }
 <main>
   <div id="product-list"></div>
   <div class="empty-search" id="empty-search">No products found.</div>
-  <div class="ref-note">Ref: 1070/JILD/0426/JVSMKS · All prices include VAT 11% · List prices exclude regular discount</div>
+  <div class="ref-note">Ref: 2809/JILD/1026/JVSMKS · All prices include VAT 11% · List prices exclude regular discount<br>Tinter prices and Old Stock prices from the 15 May 2026 list (Ref: 1070/JILD/0426/JVSMKS)</div>
 </main>
 
 <script>
 const fmt = n => n ? n.toLocaleString('id-ID') : '—';
 
 // Per-category discount. Deliberately NOT persisted - resets on every open.
-const DISC = { exterior:0, interior:0, wm:0, primer:0, thinner:0, tinter:0 };
-const DISC_LABELS = { exterior:'Exterior', interior:'Interior', wm:'W&M', primer:'Primer', thinner:'Thinner', tinter:'Tinter' };
+const DISC = { exterior:0, interior:0, oldstock:0, wm:0, primer:0, thinner:0, tinter:0 };
+const DISC_LABELS = { exterior:'Exterior', interior:'Interior', oldstock:'Old Stock', wm:'W&M', primer:'Primer', thinner:'Thinner', tinter:'Tinter' };
 function net(price, cat) {
   const d = DISC[cat] || 0;
   if (!price || !d) return null;
@@ -243,19 +244,17 @@ const DATA = {
         { name: 'Base B', prices: { '2.5L': 328750, '20L': 2373700 } },
         { name: 'Base C', prices: { '2.5L': 311150, '20L': 2235800 } },
       ]},
-      { name: 'Majestic True Beauty Sheen', type: 'Water Base / Pure Acrylic', variants: [
-        { name: 'White',       prices: { '2.5L': 361300, '20L': 2457000 } },
-        { name: 'Base A',      prices: { '2.5L': 338700, '20L': 2290800 } },
-        { name: 'Base B',      prices: { '2.5L': 293550, '20L': 2152100 } },
-        { name: 'Base C',      prices: { '2.5L': 264400, '20L': 2012700 } },
-        { name: 'Base Yellow', prices: { '2.5L': 533950, '20L': 3983500 } },
+      { name: 'Majestic True Beauty Sheen', type: 'Water Base / Pure Acrylic · NEW PRODUCT', variants: [
+        { name: 'White',  prices: { '2.5L': 372100, '20L': 2530700 } },
+        { name: 'Base A', prices: { '2.5L': 348800, '20L': 2359300 } },
+        { name: 'Base B', prices: { '2.5L': 302300, '20L': 2216600 } },
+        { name: 'Base C', prices: { '2.5L': 277600, '20L': 2073000 } },
       ]},
-      { name: 'Majestic True Beauty Matt', type: 'Water Base / Pure Acrylic', variants: [
-        { name: 'White',       prices: { '2.5L': 307300, '20L': 2251700 } },
-        { name: 'Base A',      prices: { '2.5L': 298300, '20L': 2152700 } },
-        { name: 'Base B',      prices: { '2.5L': 257400, '20L': 1977000 } },
-        { name: 'Base C',      prices: { '2.5L': 223000, '20L': 1714400 } },
-        { name: 'Base Yellow', prices: { '2.5L': 464500, '20L': 3529600 } },
+      { name: 'Majestic True Beauty Matt', type: 'Water Base / Pure Acrylic · NEW PRODUCT', variants: [
+        { name: 'White',  prices: { '2.5L': 372100, '20L': 2530700 } },
+        { name: 'Base A', prices: { '2.5L': 348800, '20L': 2359300 } },
+        { name: 'Base B', prices: { '2.5L': 302300, '20L': 2216600 } },
+        { name: 'Base C', prices: { '2.5L': 277600, '20L': 2073000 } },
       ]},
       { name: 'Essence Coverplus Sheen', type: 'Water Base / Modified Acrylic', variants: [
         { name: 'White',  prices: { '3.5L': 325100, '18L': 1427600 } },
@@ -277,6 +276,25 @@ const DATA = {
       { name: 'Jotaplast', type: 'Modified Acrylic Emulsion', variants: [
         { name: 'White',  prices: { '3.5L': 189900, '18L': 859700 } },
         { name: 'Base A', prices: { '3.5L': 186400, '18L': 835200 } },
+      ]},
+    ]
+  },
+  oldstock: {
+    label: 'Old Stock · Discontinued',
+    products: [
+      { name: 'Majestic True Beauty Sheen · OLD', type: 'Discontinued · 15 May 2026 price · max 15% discount', variants: [
+        { name: 'White',       prices: { '2.5L': 361300, '20L': 2457000 } },
+        { name: 'Base A',      prices: { '2.5L': 338700, '20L': 2290800 } },
+        { name: 'Base B',      prices: { '2.5L': 293550, '20L': 2152100 } },
+        { name: 'Base C',      prices: { '2.5L': 264400, '20L': 2012700 } },
+        { name: 'Base Yellow', prices: { '2.5L': 533950, '20L': 3983500 } },
+      ]},
+      { name: 'Majestic True Beauty Matt · OLD', type: 'Discontinued · 15 May 2026 price · max 15% discount', variants: [
+        { name: 'White',       prices: { '2.5L': 307300, '20L': 2251700 } },
+        { name: 'Base A',      prices: { '2.5L': 298300, '20L': 2152700 } },
+        { name: 'Base B',      prices: { '2.5L': 257400, '20L': 1977000 } },
+        { name: 'Base C',      prices: { '2.5L': 223000, '20L': 1714400 } },
+        { name: 'Base Yellow', prices: { '2.5L': 464500, '20L': 3529600 } },
       ]},
     ]
   },
