@@ -349,9 +349,8 @@ function autoPrice(code, prod, pack) {
 function fmtPrice(raw, disc) {
   const n = parseFloat(raw);
   if (raw === '' || raw == null || isNaN(n)) return null;
-  const v = Math.round((disc > 0 ? n * (1 - disc / 100) : n) * 100) / 100;
-  const whole = Number.isInteger(v);
-  return 'Rp ' + v.toLocaleString('id-ID', { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
+  const v = Math.round(disc > 0 ? n * (1 - disc / 100) : n);
+  return 'Rp ' + v.toLocaleString('id-ID');
 }
 
 /* ── Date switch ── */
@@ -381,16 +380,16 @@ function addColor() {
     <div class="color-card-body">
       <div class="field-row">
         <div class="field">
-          <label>Color Name</label>
-          <input id="cname-${id}" placeholder="e.g. Light Antique" autocomplete="off"
-                 oninput="onColorInput(${id},this)" onkeydown="suggestKey(${id},event)" onblur="hideSuggest(${id})">
-          <div class="suggest" id="sug-cname-${id}" hidden></div>
-        </div>
-        <div class="field">
           <label>Color Code</label>
           <input id="ccode-${id}" placeholder="e.g. 0471" autocomplete="off"
                  oninput="onColorInput(${id},this)" onkeydown="suggestKey(${id},event)" onblur="hideSuggest(${id})">
           <div class="suggest" id="sug-ccode-${id}" hidden></div>
+        </div>
+        <div class="field">
+          <label>Color Name</label>
+          <input id="cname-${id}" placeholder="e.g. Light Antique" autocomplete="off"
+                 oninput="onColorInput(${id},this)" onkeydown="suggestKey(${id},event)" onblur="hideSuggest(${id})">
+          <div class="suggest" id="sug-cname-${id}" hidden></div>
         </div>
       </div>
       <div class="db-status" id="status-${id}" hidden></div>
@@ -420,7 +419,7 @@ function addColor() {
     </div>`;
   container.appendChild(card);
   renderToggles(id, CATEGORIES[0]);
-  card.querySelector(`#cname-${id}`).focus();
+  card.querySelector(`#ccode-${id}`).focus();
 }
 
 /* ── Colour search ── */
@@ -562,7 +561,7 @@ function buildPreviewText(id) {
   const ccode   = document.getElementById(`ccode-${id}`)?.value.trim() || '';
   const disc    = parseFloat(document.getElementById(`disc-${id}`)?.value) || 0;
   const toggles = document.querySelectorAll(`#prod-toggles-${id} .prod-toggle`);
-  const colorLine = [cname, ccode === 'WHITE' ? '' : ccode].filter(Boolean).join(' ');
+  const colorLine = [ccode === 'WHITE' ? '' : ccode, cname].filter(Boolean).join(' ');
   let lines = [];
   const isPrimer = cat.includes('Primer');
   if (colorLine && !isPrimer) lines.push(`*${colorLine}*`);
