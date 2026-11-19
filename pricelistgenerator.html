@@ -224,6 +224,28 @@ main { max-width: 600px; margin: 0 auto; padding: 16px 16px 60px; }
 }
 .add-color-btn:hover { border-color: var(--text); color: var(--text); }
 
+/* ── Date switch ── */
+.date-switch { display:flex; gap:6px; margin-top:10px; }
+.date-opt { padding:5px 11px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer;
+  border:0.5px solid rgba(255,255,255,0.3); color:rgba(255,255,255,0.6); background:none; font-family:'DM Sans',sans-serif; }
+.date-opt.active { background:#fff; color:var(--text); border-color:#fff; }
+/* ── Colour search ── */
+.field { position:relative; }
+.suggest { position:absolute; left:0; right:0; top:100%; z-index:10; background:var(--surface);
+  border:0.5px solid var(--border2); border-radius:8px; margin-top:3px; max-height:220px; overflow-y:auto;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08); }
+.suggest div { padding:9px 12px; font-size:13px; cursor:pointer; border-bottom:0.5px solid var(--border); }
+.suggest div:last-child { border-bottom:none; }
+.suggest div:hover, .suggest div.hl { background:var(--input-bg); }
+.suggest b { font-family:'Space Grotesk',sans-serif; margin-right:6px; }
+.db-status { font-size:11px; margin:-4px 0 12px; padding:6px 10px; border-radius:6px; }
+.db-status.ok { background:#E8F3EC; color:#1A7A3A; }
+.db-status.no { background:#FBF0E4; color:#9C5700; }
+.pack-input.auto { color:#1A7A3A; }
+.pack-input.edited { border-color:#C98A2B; }
+.edit-mark { font-size:10px; color:#C98A2B; margin-left:6px; }
+.na-note { font-size:11px; color:var(--muted); font-style:italic; margin-bottom:6px; }
+.reset-btn { font-size:10px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; margin-left:auto; }
 .home-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px 6px 10px;margin-bottom:12px;background:rgba(255,255,255,0.07);border:0.5px solid rgba(255,255,255,0.14);border-radius:8px;color:rgba(255,255,255,0.65);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.3px;text-decoration:none;transition:all 0.15s}
 .home-btn:hover{background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.3);color:#fff}
 .home-btn svg{width:13px;height:13px}
@@ -235,6 +257,10 @@ main { max-width: 600px; margin: 0 auto; padding: 16px 16px 60px; }
   <a class="home-btn" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>Tools</a>
   <div class="header-title">Pricelist Generator</div>
   <div class="header-sub">Jotun Decorative · WhatsApp Format</div>
+  <div class="date-switch">
+    <button class="date-opt" id="d-now" onclick="setDate(0)">Harga 24 Okt 2026</button>
+    <button class="date-opt" id="d-dec" onclick="setDate(1)">Harga 1 Des 2026</button>
+  </div>
 </header>
 
 <main>
@@ -243,67 +269,110 @@ main { max-width: 600px; margin: 0 auto; padding: 16px 16px 60px; }
 </main>
 
 <script>
+const DB = {"col":{"BF":2704750.0,"BS":525500.0,"BV":416500.0,"FS":436375.0,"GI":547875.0,"GO":1256375.0,"GS":1026875.0,"GV":504125.0,"HT":416500.0,"MA":1156875.0,"OK":283375.0,"RB":300000.0,"RE":1342000.0,"RS":1581750.0,"RY":486875.0,"SS":393125.0,"ST":815000.0,"SV":285625.0,"YC":2704750.0},"bp":{"JOTASHIELD INFINITY|White|2.5":[524100.0,550300.0],"JOTASHIELD INFINITY|White|20":[3699600.0,3884600.0],"JOTASHIELD INFINITY|A|2.5":[513900.0,539600.0],"JOTASHIELD INFINITY|A|20":[3641300.0,3823400.0],"JOTASHIELD INFINITY|B|2.5":[480600.0,504600.0],"JOTASHIELD INFINITY|B|20":[3334500.0,3501200.0],"JOTASHIELD INFINITY|C|2.5":[460700.0,483700.0],"JOTASHIELD INFINITY|C|20":[3124000.0,3280200.0],"JOTASHIELD ULTRA CLEAN|White|2.5":[447900.0,470300.0],"JOTASHIELD ULTRA CLEAN|White|20":[3300800.0,3465800.0],"JOTASHIELD ULTRA CLEAN|A|2.5":[440500.0,462500.0],"JOTASHIELD ULTRA CLEAN|A|20":[3123400.0,3279600.0],"JOTASHIELD ULTRA CLEAN|B|2.5":[411900.0,432500.0],"JOTASHIELD ULTRA CLEAN|B|20":[2859500.0,3002500.0],"JOTASHIELD ULTRA CLEAN|C|2.5":[395100.0,414900.0],"JOTASHIELD ULTRA CLEAN|C|20":[2679000.0,2812950.0],"JOTASHIELD FLEX|White|2.5":[445900.0,468200.0],"JOTASHIELD FLEX|White|20":[3266200.0,3429500.0],"JOTASHIELD FLEX|A|2.5":[451000.0,473550.0],"JOTASHIELD FLEX|A|20":[3223700.0,3384900.0],"JOTASHIELD FLEX|B|2.5":[406000.0,426300.0],"JOTASHIELD FLEX|B|20":[2742200.0,2879300.0],"JOTASHIELD FLEX|C|2.5":[388500.0,408000.0],"JOTASHIELD FLEX|C|20":[2568000.0,2696400.0],"JOTASHIELD ANTIFADE COLOURS|White|2.5":[432500.0,454100.0],"JOTASHIELD ANTIFADE COLOURS|White|20":[3188300.0,3347700.0],"JOTASHIELD ANTIFADE COLOURS|A|2.5":[396550.0,416400.0],"JOTASHIELD ANTIFADE COLOURS|A|20":[2935100.0,3081850.0],"JOTASHIELD ANTIFADE COLOURS|B|2.5":[367600.0,386000.0],"JOTASHIELD ANTIFADE COLOURS|B|20":[2560600.0,2688600.0],"JOTASHIELD ANTIFADE COLOURS|C|2.5":[348800.0,366200.0],"JOTASHIELD ANTIFADE COLOURS|C|20":[2389000.0,2508450.0],"JOTASHIELD ANTIFADE COLOURS|Bright Yellow|2.5":[661700.0,694800.0],"JOTASHIELD ANTIFADE COLOURS|Bright Yellow|20":[4933700.0,5180400.0],"JOTASHIELD ANTIFADE COLOURS|Golden Yellow|2.5":[542100.0,569200.0],"JOTASHIELD ANTIFADE COLOURS|Golden Yellow|20":[4040700.0,4242700.0],"TOUGH SHIELD MAX|White|3.5":[376000.0,394800.0],"TOUGH SHIELD MAX|White|18":[1877600.0,1971500.0],"TOUGH SHIELD MAX|A|3.5":[350400.0,367900.0],"TOUGH SHIELD MAX|A|18":[1766100.0,1854400.0],"TOUGH SHIELD MAX|B|3.5":[327100.0,343500.0],"TOUGH SHIELD MAX|B|18":[1582800.0,1661900.0],"TOUGH SHIELD MAX|C|3.5":[292300.0,306900.0],"TOUGH SHIELD MAX|C|18":[1439000.0,1510950.0],"TOUGH SHIELD|White|3.5":[264300.0,277500.0],"TOUGH SHIELD|White|18":[1206600.0,1266900.0],"TOUGH SHIELD|AA|3.5":[245000.0,257250.0],"TOUGH SHIELD|AA|18":[1141100.0,1198200.0],"TOUGH SHIELD|A|3.5":[230400.0,241900.0],"TOUGH SHIELD|A|18":[1072050.0,1125700.0],"TOUGH SHIELD|C|3.5":[190700.0,200200.0],"TOUGH SHIELD|C|18":[884200.0,928400.0],"WATERGUARD|White|0.9":[101850.0,106900.0],"WATERGUARD|White|3.5":[356000.0,373800.0],"WATERGUARD|White|15":[1499000.0,1573950.0],"WATERGUARD|AA|0.9":[77600.0,81500.0],"WATERGUARD|AA|3.5":[270400.0,283900.0],"WATERGUARD|AA|15":[1144200.0,1201400.0],"WATERGUARD|A|0.9":[75200.0,79000.0],"WATERGUARD|A|3.5":[259800.0,272800.0],"WATERGUARD|A|15":[1095500.0,1150300.0],"WATERGUARD|C|0.9":[69100.0,72600.0],"WATERGUARD|C|3.5":[238600.0,250500.0],"WATERGUARD|C|15":[1005600.0,1055900.0],"MAJESTIC PURE COLOR|White|2.5":[416200.0,437000.0],"MAJESTIC PURE COLOR|White|20":[2982800.0,3131900.0],"MAJESTIC PURE COLOR|A|2.5":[390600.0,410100.0],"MAJESTIC PURE COLOR|A|20":[2899800.0,3044800.0],"MAJESTIC PURE COLOR|B|2.5":[358300.0,376200.0],"MAJESTIC PURE COLOR|B|20":[2538500.0,2665400.0],"MAJESTIC PURE COLOR|C|2.5":[339100.0,356100.0],"MAJESTIC PURE COLOR|C|20":[2358500.0,2476400.0],"MAJESTIC SENSE|White|2.5":[381350.0,400400.0],"MAJESTIC SENSE|White|20":[2738000.0,2874900.0],"MAJESTIC SENSE|A|2.5":[361500.0,379600.0],"MAJESTIC SENSE|A|20":[2697800.0,2832700.0],"MAJESTIC SENSE|B|2.5":[328750.0,345200.0],"MAJESTIC SENSE|B|20":[2373700.0,2492400.0],"MAJESTIC SENSE|C|2.5":[311150.0,326700.0],"MAJESTIC SENSE|C|20":[2235800.0,2347600.0],"MAJESTIC TRUE BEAUTY SHEEN|White|2.5":[372100.0,372100.0],"MAJESTIC TRUE BEAUTY SHEEN|White|20":[2530700.0,2530700.0],"MAJESTIC TRUE BEAUTY SHEEN|A|2.5":[348800.0,348800.0],"MAJESTIC TRUE BEAUTY SHEEN|A|20":[2359300.0,2359300.0],"MAJESTIC TRUE BEAUTY SHEEN|B|2.5":[302300.0,302300.0],"MAJESTIC TRUE BEAUTY SHEEN|B|20":[2216600.0,2216600.0],"MAJESTIC TRUE BEAUTY SHEEN|C|2.5":[277600.0,277600.0],"MAJESTIC TRUE BEAUTY SHEEN|C|20":[2073000.0,2073000.0],"MAJESTIC TRUE BEAUTY MATT|White|2.5":[372100.0,372100.0],"MAJESTIC TRUE BEAUTY MATT|White|20":[2530700.0,2530700.0],"MAJESTIC TRUE BEAUTY MATT|A|2.5":[348800.0,348800.0],"MAJESTIC TRUE BEAUTY MATT|A|20":[2359300.0,2359300.0],"MAJESTIC TRUE BEAUTY MATT|B|2.5":[302300.0,302300.0],"MAJESTIC TRUE BEAUTY MATT|B|20":[2216600.0,2216600.0],"MAJESTIC TRUE BEAUTY MATT|C|2.5":[277600.0,277600.0],"MAJESTIC TRUE BEAUTY MATT|C|20":[2073000.0,2073000.0],"ESSENCE COVERPLUS SHEEN|White|3.5":[325100.0,341400.0],"ESSENCE COVERPLUS SHEEN|White|18":[1427600.0,1499000.0],"ESSENCE COVERPLUS SHEEN|A|3.5":[320100.0,336100.0],"ESSENCE COVERPLUS SHEEN|A|18":[1260200.0,1323200.0],"ESSENCE COVERPLUS SHEEN|B|3.5":[302100.0,317200.0],"ESSENCE COVERPLUS SHEEN|B|18":[1167300.0,1225700.0],"ESSENCE COVERPLUS SHEEN|C|3.5":[262800.0,275900.0],"ESSENCE COVERPLUS SHEEN|C|18":[1033400.0,1085000.0],"ESSENCE EASY WIPE|White|3.5":[246400.0,258700.0],"ESSENCE EASY WIPE|White|18":[1142300.0,1199400.0],"ESSENCE EASY WIPE|AA|3.5":[222000.0,233100.0],"ESSENCE EASY WIPE|AA|18":[1029400.0,1080900.0],"ESSENCE EASY WIPE|A|3.5":[216200.0,227000.0],"ESSENCE EASY WIPE|A|18":[1001600.0,1051700.0],"ESSENCE EASY WIPE|C|3.5":[181200.0,190300.0],"ESSENCE EASY WIPE|C|18":[837400.0,879300.0],"ESSENCE EASY CEILING|White|3.5":[231100.0,242700.0],"ESSENCE EASY CEILING|White|18":[1038100.0,1090000.0],"JOTAPLAST|White|3.5":[189900.0,199400.0],"JOTAPLAST|White|18":[859700.0,902700.0],"JOTAPLAST|A|3.5":[186400.0,195700.0],"JOTAPLAST|A|18":[835200.0,877000.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|White|0.9":[133800.0,140500.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|White|5":[672300.0,705900.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|White|20":[2555000.0,2682750.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|A|0.9":[132100.0,138700.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|A|5":[660400.0,693400.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|A|20":[2509500.0,2635000.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|B|0.9":[123100.0,129300.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|B|5":[615100.0,645900.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|B|20":[2337400.0,2454300.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|C|0.9":[109800.0,115300.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|C|5":[548900.0,576300.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|C|20":[2086000.0,2190300.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|Yellow|0.9":[151800.0,159400.0],"GARDEX PREMIUM GLOSS/SEMI GLOSS|Yellow|5":[759100.0,797100.0],"ESSENCE HI-GLOSS|White|0.9":[114200.0,119900.0],"ESSENCE HI-GLOSS|White|5":[571000.0,599550.0],"ESSENCE HI-GLOSS|A|0.9":[113400.0,119100.0],"ESSENCE HI-GLOSS|A|5":[567400.0,595800.0],"ESSENCE HI-GLOSS|A|20":[2198700.0,2308600.0],"ESSENCE HI-GLOSS|B|0.9":[98900.0,103800.0],"ESSENCE HI-GLOSS|B|5":[494450.0,519200.0],"ESSENCE HI-GLOSS|B|20":[1913900.0,2009600.0],"ESSENCE HI-GLOSS|C|0.9":[92700.0,97300.0],"ESSENCE HI-GLOSS|C|5":[463800.0,487000.0],"ESSENCE HI-GLOSS|C|20":[1797950.0,1887800.0],"MAJESTIC SUPREME W&M GLOSS|White|0.9":[167900.0,176300.0],"MAJESTIC SUPREME W&M GLOSS|White|5":[837600.0,879500.0],"MAJESTIC SUPREME W&M GLOSS|A|0.9":[159800.0,167800.0],"MAJESTIC SUPREME W&M GLOSS|A|5":[796700.0,836500.0],"MAJESTIC SUPREME W&M GLOSS|B|0.9":[140000.0,147000.0],"MAJESTIC SUPREME W&M GLOSS|B|5":[696900.0,731700.0],"MAJESTIC SUPREME W&M GLOSS|C|0.9":[131800.0,138400.0],"MAJESTIC SUPREME W&M GLOSS|C|5":[658500.0,691400.0],"MAJESTIC SUPREME W&M SMATT|White|0.9":[167900.0,176300.0],"MAJESTIC SUPREME W&M SMATT|White|5":[837600.0,879500.0],"MAJESTIC SUPREME W&M SMATT|A|0.9":[159800.0,167800.0],"MAJESTIC SUPREME W&M SMATT|A|5":[796700.0,836500.0],"MAJESTIC SUPREME W&M SMATT|B|0.9":[140000.0,147000.0],"MAJESTIC SUPREME W&M SMATT|B|5":[696900.0,731700.0],"MAJESTIC SUPREME W&M SMATT|C|0.9":[131800.0,138400.0],"MAJESTIC SUPREME W&M SMATT|C|5":[658500.0,691400.0],"JOTAROOF HR|C|2.5":[262100.0,275200.0],"JOTAROOF HR|C|20":[1990900.0,2090400.0],"CITOPRIMER 09|-|2.5":[303200.0,318400.0],"CITOPRIMER 09|-|20":[2369100.0,2487600.0],"ULTRA PRIMER|-|2.5":[248900.0,261300.0],"ULTRA PRIMER|-|20":[1885500.0,1979800.0],"GARDEX PRIMER / ZINC Phosphate|-|0.9":[99200.0,104200.0],"GARDEX PRIMER / ZINC Phosphate|-|5":[530200.0,556700.0],"GARDEX PRIMER / ZINC Phosphate|-|20":[1977800.0,2076700.0],"JOTASHIELD PRIMER|-|2.5":[184250.0,193500.0],"JOTASHIELD PRIMER|-|20":[1401200.0,1471300.0],"MAJESTIC PRIMER (For WALLS)|-|2.5":[173000.0,181650.0],"MAJESTIC PRIMER (For WALLS)|-|20":[1286800.0,1351100.0],"MAJESTIC PRIMER WOOD AND TRIMS|-|0.9":[102300.0,107400.0],"MAJESTIC PRIMER WOOD AND TRIMS|-|5":[463500.0,486700.0],"TOUGH SHIELD PRIMER|-|3.5":[217500.0,228400.0],"TOUGH SHIELD PRIMER|-|18":[1013500.0,1064200.0],"ESSENCE EASY PRIMER|-|3.5":[206600.0,216900.0],"ESSENCE EASY PRIMER|-|18":[962700.0,1010800.0],"JOTAPLAST PRIMER|-|3.5":[145800.0,153100.0],"JOTAPLAST PRIMER|-|18":[645600.0,677900.0]},"gp":{"G1":["ESSENCE COVERPLUS SHEEN","MAJESTIC PURE COLOR","MAJESTIC SENSE","MAJESTIC TRUE BEAUTY MATT","MAJESTIC TRUE BEAUTY SHEEN","GARDEX PREMIUM GLOSS/SEMI GLOSS","ESSENCE HI-GLOSS","MAJESTIC SUPREME W&M GLOSS","MAJESTIC SUPREME W&M SMATT"],"G1a":["GARDEX PREMIUM GLOSS/SEMI GLOSS","ESSENCE HI-GLOSS","MAJESTIC SUPREME W&M GLOSS","MAJESTIC SUPREME W&M SMATT"],"G1b":["ESSENCE COVERPLUS SHEEN","MAJESTIC PURE COLOR","MAJESTIC SENSE","MAJESTIC TRUE BEAUTY MATT","MAJESTIC TRUE BEAUTY SHEEN"],"EW":["ESSENCE EASY WIPE"],"JP":["JOTAPLAST"],"JS":["JOTASHIELD ANTIFADE COLOURS","JOTASHIELD FLEX","JOTASHIELD INFINITY","JOTASHIELD ULTRA CLEAN"],"HG":["ESSENCE HI-GLOSS"],"TSM":["TOUGH SHIELD MAX"],"TS":["TOUGH SHIELD"],"WG":["WATERGUARD"],"JR":["JOTAROOF HR"],"G1Y":["GARDEX PREMIUM GLOSS/SEMI GLOSS","MAJESTIC SENSE","MAJESTIC TRUE BEAUTY MATT","MAJESTIC TRUE BEAUTY SHEEN"]},"names":{"0471":"Light Antique","1334":"Pure Barley","1140":"Sand","9915":"Oxford River","9910":"Suave","1276":"Soft","8190":"Apple White","1133":"Mito","2392":"Chocolate","7039":"Khaki","0125":"Island Green (Palm Leaf)","9913":"Matrix","10678":"Space","6084":"Sea Emerald","1622":"Edelweiss","0486":"Early Rain","1462":"Evening Sky","1973":"Objective","1075":"Navajo White","6383":"Imagine","1931":"Cashew","1998":"Spring Champagne","1359":"Macchiato","12076":"Modern Beige","2024":"Light Mocha (Senses)","9938":"Blackened Black","6384":"Wish","7270":"Apple Frost","7270(GS3)":"Apple Frost + Gs003","2561":"Mountain Sunset","1456":"Blonde Ambition","1678":"Gold Canary","1628":"Tangerine Blast","1021":"Colza Yellow","1023":"Traffic Yellow","10038":"Yellow Shan","S0580-Y10R":"S0580-Y10R (Ncs)","S0580-Y20R":"S0580-Y20R (Ncs)","1574":"Old Lace","7236":"Chi","9931":"Pure","1105":"Soyamilk","9918":"Morning Fog","9904":"Twilight","1519":"Vanilla Latte","1624":"Skylight","9911":"Platinum","1024":"Timeless","5001":"Snow-White","1453":"Vanilla","6317":"Alphine Snow","0099":"Black","9920":"Carbon Black","3309":"Deep Burgundy","4403":"Midnight Blue","1032":"Iron Grey","2185":"Oriental Red","4224":"Royal Blue","8054":"Sunny Spot","10406":"Golden Lily","1153":"Quick Sand","1434":"Elegant","2040":"Light Granite","8493":"Green Tea","7543":"Dusty Green","8302":"Laurel","7555":"Soft Mint","12182":"Gentle Whisper","8316":"Thunder Grey","0394":"Soft Grey","1875":"Sense","2951":"Sophisticated Red","1352":"Tender Grey","1017":"Peach","1235":"White Sand","10961":"Raw Canvas","4468":"Alladin","1001":"Egg White","10342":"Sable Stone","1177":"Nobile","WHITE":"White"},"fm":{"0471":[["G1","int","A",{"OK":2.0,"RE":1.0,"SV":5.0}],["EW","int","AA",{"OK":1.7,"RE":0.6,"SV":5.6}],["JP","int","A",{"OK":1.5,"RE":0.5,"SV":5.0}],["JS","ext","A",{"OK":2.0,"RE":1.0,"ST":2.5}],["TSM","ext","A",{"OK":2.0,"RE":1.0,"SV":5.0}],["TS","ext","AA",{"OK":1.7,"RE":0.6,"SV":5.6}]],"1334":[["G1","int","A",{"GI":1.0,"OK":3.0,"SV":1.0}],["EW","int","AA",{"GI":0.6,"OK":2.3,"SV":1.1}],["JP","int","A",{"GI":0.5,"OK":2.0,"SV":1.0}],["JS","ext","A",{"OK":3.0,"SV":1.0,"YC":1.0}],["TSM","ext","A",{"OK":3.0,"SV":1.0,"YC":1.0}],["TS","ext","AA",{"OK":3.6,"SV":0.9,"YC":0.8}],["WG","ext","AA",{"OK":3.6,"SV":0.9,"YC":0.8}]],"1140":[["G1","int","A",{"OK":17.47,"RB":2.24,"SS":6.64}],["EW","int","A",{"OK":8.5,"RB":1.1,"SS":4.2}],["JP","int","A",{"OK":12.8,"RB":2.0,"SS":6.8}],["JS","ext","A",{"OK":19.74,"RE":7.35,"ST":21.37}],["TSM","ext","A",{"OK":17.47,"RB":2.24,"SS":6.64}],["TS","ext","A",{"OK":8.5,"RB":1.1,"SS":4.2}]],"9915":[["G1","int","A",{"OK":2.5,"RB":0.5,"SS":4.3}],["EW","int","A",{"OK":0.8,"SV":18.8}],["JP","int","A",{"OK":1.0,"SV":25.0}],["JS","ext","A",{"OK":2.5,"RB":0.5,"ST":12.9}],["TSM","ext","A",{"OK":2.5,"RB":0.5,"SS":4.3}],["TS","ext","A",{"OK":0.8,"SV":18.8}]],"9910":[["G1a","int","C",{"HT":80.0,"OK":10.5,"RB":5.5,"SS":42.5}],["G1b","int","C",{"HT":76.0,"OK":12.0,"RB":5.0,"SS":48.0}],["EW","int","C",{"HT":57.0,"OK":9.0,"RB":3.7,"SS":36.0}],["JS","ext","C",{"HT":76.0,"OK":12.0,"RB":5.0,"SS":48.0}],["TSM","ext","C",{"HT":76.0,"OK":12.0,"RB":5.0,"SS":48.0}],["TS","ext","C",{"HT":57.0,"OK":9.0,"RB":3.7,"SS":36.0}],["WG","ext","C",{"HT":57.0,"OK":9.0,"RB":3.7,"SS":36.0}],["JR","ext","C",{"HT":60.0,"OK":9.4,"RB":2.2,"ST":105.0}]],"1276":[["G1","int","A",{"OK":17.0,"RB":0.6,"SS":3.2}],["EW","int","AA",{"OK":12.4,"RB":0.5,"SV":16.4}],["JS","ext","A",{"OK":17.0,"RB":0.6,"SS":3.2}],["TSM","ext","A",{"OK":17.0,"RB":0.6,"SS":3.2}],["TS","ext","AA",{"OK":12.4,"RB":0.5,"SV":16.4}]],"8190":[["G1","int","A",{"GV":0.5,"GI":1.1,"SV":1.2}],["EW","int","AA",{"GV":1.32,"OK":1.74}],["JP","int","A",{"GV":2.0,"OK":2.0}],["JS","ext","A",{"GV":0.5,"OK":0.5,"SV":1.0,"YC":1.5}],["TSM","ext","A",{"GV":0.5,"OK":0.5,"SV":1.0,"YC":1.5}],["TS","ext","AA",{"GV":1.32,"OK":1.74}]],"1133":[["G1","int","B",{"OK":131.0,"RB":19.0,"SS":14.0}],["EW","int","C",{"HT":76.0,"OK":60.0,"RB":8.5,"SS":6.0}],["JS","ext","B",{"OK":131.0,"RB":19.0,"ST":42.0}],["TSM","ext","B",{"OK":131.0,"RB":19.0,"SS":14.0}],["TS","ext","C",{"HT":76.0,"OK":60.0,"RB":8.5,"SS":6.0}],["WG","ext","C",{"HT":76.0,"OK":60.0,"RB":8.5,"SS":6.0}]],"2392":[["G1a","int","C",{"HT":2.0,"OK":107.0,"RB":48.0,"SS":43.0}],["G1b","int","C",{"OK":70.81,"RB":49.21,"SS":39.98}],["JS","ext","C",{"OK":95.8,"RB":63.9,"SS":52.6,"RY":7.7}],["TSM","ext","C",{"OK":95.8,"RB":63.9,"SS":52.6,"RY":7.7}]],"7039":[["G1","int","A",{"BV":11.0,"OK":43.5,"SS":8.0,"SV":8.5}],["EW","int","A",{"BV":6.0,"OK":21.1,"SS":6.2}],["JP","int","A",{"BV":8.0,"OK":28.1,"SS":8.2}],["JS","ext","A",{"BV":11.0,"OK":43.5,"ST":28.3}],["TSM","ext","A",{"BV":11.0,"OK":43.5,"SS":8.0,"SV":8.5}],["TS","ext","A",{"BV":6.0,"OK":21.1,"SS":6.2}],["WG","ext","A",{"BV":6.0,"OK":21.1,"SS":6.2}]],"0125":[["G1a","int","C",{"BS":16.0,"HT":109.0,"OK":120.0,"SS":17.0}],["G1b","int","C",{"BS":15.0,"HT":87.0,"OK":128.0,"SS":23.0}],["EW","int","C",{"BS":11.3,"HT":65.3,"OK":96.0,"SS":17.3}],["JS","ext","C",{"BS":15.0,"HT":87.0,"OK":128.0,"SS":23.0}],["TSM","ext","C",{"BS":15.0,"HT":87.0,"OK":128.0,"SS":23.0}],["TS","ext","C",{"BS":11.3,"HT":65.3,"OK":96.0,"SS":17.3}],["WG","ext","C",{"BS":11.3,"HT":65.3,"OK":96.0,"SS":17.3}]],"9913":[["G1","int","B",{"OK":15.0,"RB":9.0,"SS":71.0}],["EW","int","C",{"HT":71.3,"OK":7.5,"RB":3.8,"SS":28.1}],["JS","ext","B",{"OK":15.0,"RB":9.0,"ST":213.0}],["TSM","ext","B",{"OK":15.0,"RB":9.0,"SS":71.0}],["TS","ext","C",{"HT":71.3,"OK":7.5,"RB":3.8,"SS":28.1}]],"10678":[["G1","int","A",{"OK":11.12,"RB":0.82,"SS":4.33}],["EW","int","A",{"OK":5.4,"RB":0.5,"SS":2.7}],["JP","int","A",{"OK":8.8,"RE":2.2,"SS":4.6}],["JS","ext","A",{"OK":11.12,"RB":0.82,"SS":4.33}],["TSM","ext","A",{"OK":11.12,"RB":0.82,"SS":4.33}],["TS","ext","A",{"OK":5.4,"RB":0.5,"SS":2.7}]],"6084":[["G1","int","B",{"BS":14.0,"OK":22.0,"SS":21.0}],["EW","int","C",{"BS":6.4,"HT":68.8,"OK":9.5,"SS":9.3}],["JS","ext","B",{"BS":14.0,"OK":22.0,"SS":21.0}],["TSM","ext","B",{"BS":14.0,"OK":22.0,"SS":21.0}],["TS","ext","C",{"BS":6.4,"HT":68.8,"OK":9.5,"SS":9.3}]],"1622":[["G1","int","A",{"OK":1.0,"RE":0.5,"SV":5.0}],["EW","int","AA",{"OK":0.9,"RE":0.3,"SV":5.5}],["JP","int","A",{"OK":0.8,"RE":0.3,"SV":4.9}],["JS","ext","A",{"OK":1.0,"RE":0.5,"ST":2.5}],["TSM","ext","A",{"OK":1.0,"RE":0.5,"SV":5.0}],["TS","ext","AA",{"OK":0.9,"RE":0.3,"SV":5.5}]],"0486":[["G1","int","A",{"OK":2.0,"SV":5.0}],["EW","int","AA",{"OK":1.53,"SV":4.34}],["JP","int","A",{"OK":2.09,"SV":6.0}],["JS","ext","A",{"OK":2.0,"SV":5.0}],["TSM","ext","A",{"OK":2.0,"SV":5.0}],["TS","ext","AA",{"OK":1.53,"SV":4.34}]],"1462":[["G1","int","B",{"OK":31.0,"RB":6.0,"SS":55.0}],["EW","int","C",{"HT":79.6,"OK":15.2,"RB":3.0,"SS":25.6}],["JS","ext","B",{"OK":31.0,"RB":6.0,"ST":165.0}],["TSM","ext","B",{"OK":31.0,"RB":6.0,"SS":55.0}],["TS","ext","C",{"HT":79.6,"OK":15.2,"RB":3.0,"SS":25.6}],["WG","ext","C",{"HT":79.6,"OK":15.2,"RB":3.0,"SS":25.6}]],"1973":[["G1","int","B",{"OK":6.0,"RB":0.5,"SS":7.0}],["EW","int","A",{"OK":6.0,"SS":9.8}],["JP","int","A",{"OK":8.0,"SS":13.0}],["JS","ext","B",{"OK":6.0,"RB":0.35,"ST":20.8}],["TSM","ext","B",{"OK":6.0,"RB":0.5,"SS":7.0}],["TS","ext","A",{"OK":6.0,"SS":9.8}],["WG","ext","A",{"OK":6.0,"SS":9.8}]],"1075":[["G1","int","A",{"GV":0.5,"OK":9.0,"SV":4.0}],["EW","int","AA",{"OK":6.2,"SV":4.0}],["JP","int","A",{"OK":5.5,"SV":3.5}],["JS","ext","A",{"GV":0.5,"OK":9.0,"ST":2.0}],["TSM","ext","A",{"GV":0.5,"OK":9.0,"SV":4.0}],["TS","ext","AA",{"OK":6.2,"SV":4.0}]],"6383":[["G1","int","A",{"BV":16.01,"OK":16.91,"SS":8.95}],["EW","int","AA",{"BS":3.77,"OK":12.47,"SS":7.26}],["JS","ext","A",{"BV":16.01,"OK":16.91,"SS":8.95}],["TSM","ext","A",{"BV":16.01,"OK":16.91,"SS":8.95}],["TS","ext","AA",{"BS":3.77,"OK":12.47,"SS":7.26}]],"1931":[["G1","int","A",{"OK":6.0,"RE":1.0,"SV":11.0}],["EW","int","AA",{"OK":5.2,"RE":0.5,"SV":10.1}],["JP","int","A",{"OK":4.55,"RE":0.36,"SV":11.5}],["JS","ext","A",{"OK":6.0,"RE":1.0,"ST":5.5}],["TSM","ext","A",{"OK":6.0,"RE":1.0,"SV":11.0}],["TS","ext","AA",{"OK":5.2,"RE":0.5,"SV":10.1}]],"1998":[["G1","int","A",{"OK":26.7,"RB":1.46,"SS":2.9}],["EW","int","A",{"OK":15.0,"RE":1.9,"SV":11.3}],["JP","int","A",{"OK":20.0,"RE":2.5,"SV":15.0}],["JS","ext","A",{"OK":26.7,"RB":1.46,"ST":8.7}],["TSM","ext","A",{"OK":26.7,"RB":1.46,"SS":2.9}],["TS","ext","A",{"OK":15.0,"RE":1.9,"SV":11.3}]],"1359":[["G1","int","A",{"OK":18.43,"RB":3.94,"SS":6.56}],["EW","int","A",{"OK":8.3,"RB":2.3,"SS":4.1}],["JP","int","A",{"OK":11.0,"RB":3.0,"SS":5.5}],["JS","ext","A",{"OK":18.43,"RB":3.94,"SS":6.56}],["TSM","ext","A",{"OK":18.43,"RB":3.94,"SS":6.56}],["TS","ext","A",{"OK":8.3,"RB":2.3,"SS":4.1}]],"12076":[["G1","int","A",{"OK":30.4,"RB":5.2,"SS":14.0}],["EW","int","A",{"OK":13.0,"RB":2.9,"SS":8.1}],["JP","int","A",{"OK":21.2,"RB":3.9,"SS":12.8}],["JS","ext","A",{"OK":30.4,"RB":5.2,"SS":14.0}],["TSM","ext","A",{"OK":30.4,"RB":5.2,"SS":14.0}],["TS","ext","A",{"OK":13.0,"RB":2.9,"SS":8.1}]],"2024":[["G1","int","B",{"OK":22.0,"RB":9.0,"SS":7.0}],["EW","int","A",{"OK":15.0,"RB":9.8,"SS":8.3}],["JP","int","A",{"OK":20.0,"RB":13.0,"SS":11.0}],["JS","ext","B",{"OK":22.0,"RB":9.0,"ST":21.0}],["TSM","ext","B",{"OK":22.0,"RB":9.0,"SS":7.0}],["TS","ext","A",{"OK":15.0,"RB":9.8,"SS":8.3}]],"9938":[["G1a","int","C",{"HT":13.0,"OK":22.5,"RB":8.0,"SS":96.0}],["G1b","int","C",{"HT":12.0,"OK":28.0,"RB":8.0,"SS":142.0}],["JS","ext","C",{"HT":10.75,"OK":25.07,"RB":7.16,"SS":127.16}],["TSM","ext","C",{"HT":10.75,"OK":25.07,"RB":7.16,"SS":127.16}]],"6384":[["G1","int","B",{"BS":6.81,"OK":12.34,"SS":14.16}],["EW","int","A",{"BS":8.04,"OK":13.22,"SS":16.02}],["JS","ext","B",{"BS":6.81,"OK":12.34,"SS":14.16}],["TSM","ext","B",{"BS":6.81,"OK":12.34,"SS":14.16}],["TS","ext","A",{"BS":8.04,"OK":13.22,"SS":16.02}]],"7270":[["G1","int","A",{"GV":3.0,"GI":1.5,"OK":1.5,"SV":1.0}],["EW","int","AA",{"GV":4.0,"OK":3.4}],["JP","int","A",{"GV":3.5,"OK":3.0}],["JS","ext","A",{"GV":4.0,"OK":3.0,"YC":1.0}],["TSM","ext","A",{"GV":4.0,"OK":3.0,"YC":1.0}],["TS","ext","AA",{"GV":4.0,"OK":3.4}],["WG","ext","AA",{"GV":4.0,"OK":3.4}]],"7270(GS3)":[["TS","ext","AA",{"GV":4.0,"GS":3.0,"OK":3.4}]],"2561":[["G1Y","int","Yellow",{"GO":80.0,"HT":150.0,"RS":40.0}]],"1456":[["G1Y","int","Yellow",{"GO":83.0,"HT":56.0}]],"1678":[["G1Y","int","Yellow",{"GV":8.0,"GO":200.0,"RE":41.0}]],"1628":[["G1Y","int","Yellow",{"GO":70.0,"HT":130.0,"RS":24.0}]],"1021":[["G1Y","int","Yellow",{"GO":16.0,"OK":12.0}]],"1023":[["G1Y","int","Yellow",{"GO":57.0,"HT":56.0,"SV":4.0}]],"10038":[["G1Y","int","Yellow",{"GV":2.0,"HT":90.0,"RE":17.0}]],"S0580-Y10R":[["G1Y","int","Yellow",{"GO":83.0,"HT":56.0}]],"S0580-Y20R":[["G1Y","int","Yellow",{"GO":96.0,"HT":24.0,"RE":20.0}]],"1574":[["G1","int","A",{"OK":4.0,"SV":4.5}],["EW","int","AA",{"OK":3.4,"SV":4.0}],["JP","int","A",{"OK":3.0,"SV":3.5}],["JS","ext","A",{"OK":4.0,"ST":2.3}],["TSM","ext","A",{"OK":4.0,"SV":4.5}],["TS","ext","AA",{"OK":3.4,"SV":4.0}]],"7236":[["G1","int","A",{"SV":1.0}],["EW","int","AA",{"SV":1.0}],["JP","int","A",{"SV":0.9}],["JS","ext","A",{"SV":1.0}],["TSM","ext","A",{"SV":1.0}],["TS","ext","AA",{"SV":1.0}],["WG","ext","AA",{"SV":1.0}]],"9931":[["G1","int","A",{"SV":0.5}],["EW","int","AA",{"HT":4.5}],["JP","int","A",{"HT":4.0}],["JS","ext","A",{"SV":0.5}],["TSM","ext","A",{"SV":0.5}],["TS","ext","AA",{"HT":4.5}]],"1105":[["G1","int","A",{"OK":1.0,"SV":2.0}],["EW","int","AA",{"OK":0.9,"SV":1.7}],["JP","int","A",{"OK":0.8,"SV":1.5}],["JS","ext","A",{"OK":1.0,"ST":1.0}],["TSM","ext","A",{"OK":1.0,"SV":2.0}],["TS","ext","AA",{"OK":0.9,"SV":1.7}]],"9918":[["G1","int","A",{"OK":0.35,"SV":2.4}],["EW","int","AA",{"OK":0.6,"SV":2.8}],["JP","int","A",{"OK":0.5,"SV":2.5}],["JS","ext","A",{"OK":0.35,"ST":1.25}],["TSM","ext","A",{"OK":0.35,"SV":2.4}],["TS","ext","AA",{"OK":0.6,"SV":2.8}],["WG","ext","AA",{"OK":0.6,"SV":2.8}]],"9904":[["G1","int","A",{"OK":0.5,"RE":0.5,"SV":11.0}],["EW","int","AA",{"OK":0.6,"SV":11.3}],["JP","int","A",{"OK":0.5,"SV":10.0}],["JS","ext","A",{"OK":0.5,"RE":0.5,"ST":5.5}],["TSM","ext","A",{"OK":0.5,"RE":0.5,"SV":11.0}],["TS","ext","AA",{"OK":0.6,"SV":11.3}],["WG","ext","AA",{"OK":0.6,"SV":11.3}]],"1519":[["G1","int","A",{"OK":8.5,"RB":0.7,"SV":9.5}],["EW","int","A",{"OK":4.1,"RB":0.4,"SS":1.1}],["JP","int","A",{"OK":5.5,"RB":0.5,"SS":1.5}],["JS","ext","A",{"OK":8.5,"RB":0.7,"ST":4.75}],["TSM","ext","A",{"OK":8.5,"RB":0.7,"SV":9.5}],["TS","ext","A",{"OK":4.1,"RB":0.4,"SS":1.1}]],"1624":[["G1","int","A",{"OK":0.5,"SV":1.5}],["EW","int","AA",{"OK":0.6,"SV":1.1}],["JP","int","A",{"OK":0.5,"SV":1.0}],["JS","ext","A",{"OK":0.5,"ST":0.8}],["TSM","ext","A",{"OK":0.5,"SV":1.5}],["TS","ext","AA",{"OK":0.6,"SV":1.1}]],"9911":[["G1","int","B",{"OK":1.8,"RB":0.6,"SS":7.1}],["EW","int","A",{"OK":1.6,"RB":0.5,"SS":8.0}],["JP","int","A",{"OK":2.1,"RB":0.7,"SS":10.7}],["JS","ext","B",{"OK":1.8,"RB":0.6,"ST":21.3}],["TSM","ext","B",{"OK":1.8,"RB":0.6,"SS":7.1}],["TS","ext","A",{"OK":1.6,"RB":0.5,"SS":8.0}],["WG","ext","A",{"OK":1.6,"RB":0.5,"SS":8.0}]],"1024":[["G1","int","A",{"OK":4.0,"SV":13.0}],["EW","int","AA",{"OK":2.8,"SV":11.5}],["JP","int","A",{"OK":2.0,"SS":2.0}],["JS","ext","A",{"OK":4.0,"ST":6.5}],["TSM","ext","A",{"OK":4.0,"SV":13.0}],["TS","ext","AA",{"OK":2.8,"SV":11.5}]],"5001":[["G1","int","A",{"BV":0.6,"RE":0.35,"SV":1.8}],["EW","int","AA",{"BV":0.6,"RE":0.5,"SV":1.0}],["JP","int","A",{"BV":0.4,"SV":2.4}],["JS","ext","A",{"BV":0.6,"RE":0.35,"SV":1.8}],["TSM","ext","A",{"BV":0.6,"RE":0.35,"SV":1.8}],["TS","ext","AA",{"BV":0.6,"RE":0.5,"SV":1.0}]],"1453":[["G1","int","A",{"GI":0.5,"OK":0.5,"SV":2.0}],["EW","int","AA",{"OK":1.7,"SV":2.3}],["JP","int","A",{"OK":1.5,"SV":2.0}],["JS","ext","A",{"OK":1.1,"YC":0.5,"ST":1.2}],["TSM","ext","A",{"HT":60.0,"OK":1.0,"SV":2.0,"YC":1.0}],["TS","ext","AA",{"OK":1.7,"SV":2.3}]],"6317":[["G1","int","A",{"SV":10.0}],["EW","int","AA",{"SV":8.6}],["JP","int","A",{"SV":7.6}],["JS","ext","A",{"ST":5.0}],["TSM","ext","A",{"SV":10.0}],["TS","ext","AA",{"SV":8.6}],["WG","ext","AA",{"SV":8.6}]],"0099":[["G1","int","C",{"SS":260.0}],["JS","ext","C",{"SS":170.0}],["TSM","ext","C",{"SS":170.0}]],"9920":[["G1a","int","C",{"HT":41.0,"OK":38.0,"RB":10.0,"SS":104.0}],["G1b","int","C",{"HT":32.0,"OK":37.0,"RB":9.0,"SS":114.0}],["JS","ext","C",{"HT":28.57,"OK":33.04,"RB":8.04,"SS":101.79}],["TSM","ext","C",{"HT":28.57,"OK":33.04,"RB":8.04,"SS":101.79}]],"3309":[["G1a","int","C",{"HT":48.0,"RB":37.0,"SS":73.0,"RS":29.0}],["G1b","int","C",{"HT":34.0,"RB":23.0,"SS":75.0,"RS":38.0}],["JS","ext","C",{"HT":34.0,"RB":23.0,"SS":75.0,"RS":38.0}],["TSM","ext","C",{"HT":34.0,"RB":23.0,"SS":75.0,"RS":38.0}]],"4403":[["G1a","int","C",{"BS":59.0,"FS":31.0,"HT":31.0,"SS":118.0}],["G1b","int","C",{"BS":64.0,"HT":15.0,"SS":68.0}],["EW","int","C",{"BS":48.0,"HT":11.25,"SS":51.0}],["JS","ext","C",{"BS":64.0,"HT":15.0,"SS":68.0}],["TSM","ext","C",{"BS":64.0,"HT":15.0,"SS":68.0}],["TS","ext","C",{"BS":48.0,"HT":11.25,"SS":51.0}]],"1032":[["G1","int","A",{"OK":26.0,"RB":4.0,"SS":32.0}],["EW","int","A",{"OK":9.5,"RB":1.0,"SS":17.6}],["JS","ext","A",{"OK":26.0,"RB":4.0,"ST":96.0}],["TSM","ext","A",{"OK":26.0,"RB":4.0,"SS":32.0}],["TS","ext","A",{"OK":9.5,"RB":1.0,"SS":17.6}]],"2185":[["G1a","int","C",{"GO":53.0,"HT":47.0,"OK":23.5,"RS":136.0}],["G1b","int","C",{"GO":30.0,"HT":33.0,"OK":47.5,"RS":130.5}],["EW","int","C",{"GO":22.5,"HT":24.8,"OK":35.6,"RS":97.9}]],"4224":[["G1a","int","C",{"BS":258.62,"HT":27.38}],["G1b","int","C",{"BS":251.5,"HT":25.5,"SS":2.7}],["EW","int","C",{"BS":166.1,"HT":11.2,"OK":2.2}],["JS","ext","C",{"BS":251.5,"HT":25.5,"SS":2.7}],["TSM","ext","C",{"BS":251.5,"HT":25.5,"SS":2.7}],["TS","ext","C",{"BS":166.1,"HT":11.2,"OK":2.2}],["WG","ext","C",{"BS":166.1,"HT":11.2,"OK":2.2}],["JR","ext","C",{"BS":221.0,"HT":15.0,"OK":3.0}]],"8054":[["G1","int","A",{"GI":134.3,"OK":10.0,"RB":2.93,"SV":5.8}],["JP","int","A",{"GI":73.38,"OK":31.71,"SV":7.09}],["JS","ext","Bright Yellow",{"HT":52.0,"SV":2.0,"YC":34.0}]],"10406":[["G1","int","A",{"GO":3.0,"GI":248.0,"OK":10.0,"RB":7.3}],["EW","int","A",{"GI":116.93,"OK":17.75,"RB":3.94}],["JS","ext","Bright Yellow",{"RE":6.0,"YC":60.0}]],"1153":[["G1b","int","C",{"GI":5.79,"HT":29.35,"OK":227.42,"RE":7.0,"SS":5.1}],["JS","ext","Golden Yellow",{"HT":8.0,"SS":6.0}]],"1434":[["G1a","int","C",{"HT":75.0,"OK":57.0,"RB":12.0,"SS":90.0}],["G1b","int","C",{"HT":44.0,"OK":45.0,"RB":9.0,"SS":83.0}],["EW","int","C",{"HT":33.0,"OK":33.75,"RB":6.75,"SS":62.25}],["JS","ext","C",{"HT":44.0,"OK":45.0,"RB":9.0,"SS":83.0}],["TSM","ext","C",{"HT":44.0,"OK":45.0,"RB":9.0,"SS":83.0}],["TS","ext","C",{"HT":33.0,"OK":33.75,"RB":6.75,"SS":62.25}],["JR","ext","C",{"HT":32.78,"OK":29.78,"RB":2.15,"ST":164.32}]],"2040":[["G1","int","A",{"OK":27.0,"RB":9.0,"SV":28.0}],["EW","int","A",{"OK":12.0,"RB":6.0,"SV":20.3}],["JP","int","A",{"OK":16.0,"RB":8.0,"SV":27.0}],["JS","ext","A",{"OK":27.0,"RB":9.0,"SV":28.0}],["TSM","ext","A",{"OK":27.0,"RB":9.0,"SV":28.0}],["TS","ext","A",{"OK":12.0,"RB":6.0,"SV":20.3}]],"8493":[["G1","int","B",{"GV":18.2,"OK":76.2,"SS":20.2}],["JS","ext","B",{"GV":18.2,"OK":76.2,"SS":20.2}],["TSM","ext","B",{"GV":18.2,"OK":76.2,"SS":20.2}]],"7543":[["G1","int","B",{"GS":11.0,"OK":19.0,"SS":23.0}],["EW","int","A",{"GS":14.3,"OK":20.1,"SS":30.8}],["JS","ext","B",{"GS":11.0,"OK":19.0,"ST":69.0}],["TSM","ext","B",{"GS":11.0,"OK":19.0,"SS":23.0}],["TS","ext","A",{"GS":14.3,"OK":20.1,"SS":30.8}]],"8302":[["G1","int","A",{"BV":6.0,"OK":69.0,"SS":20.0}],["EW","int","A",{"GS":3.4,"OK":29.6,"SS":13.6}],["JS","ext","A",{"BV":6.0,"OK":69.0,"SS":20.0}],["TSM","ext","A",{"BV":6.0,"OK":69.0,"SS":20.0}],["TS","ext","A",{"GS":3.4,"OK":29.6,"SS":13.6}]],"7555":[["G1","int","A",{"GV":5.0,"OK":6.0,"SS":5.8}],["EW","int","A",{"GV":3.8,"OK":2.8,"SS":3.7}],["JP","int","A",{"GV":5.1,"OK":3.7,"SS":5.0}],["JS","ext","A",{"GV":5.0,"OK":6.0,"SS":5.8}],["TSM","ext","A",{"GV":5.0,"OK":6.0,"SS":5.8}],["TS","ext","A",{"GV":3.8,"OK":2.8,"SS":3.7}]],"12182":[["G1","int","A",{"OK":9.87,"RB":1.57,"SS":5.27}],["JS","ext","A",{"OK":9.87,"RB":1.57,"SS":5.27}],["TSM","ext","A",{"OK":9.87,"RB":1.57,"SS":5.27}]],"8316":[["G1","int","A",{"GV":1.0,"GI":10.0,"SS":10.0}],["EW","int","A",{"BV":3.8,"OK":11.3,"SS":3.0,"SV":3.0}],["JP","int","A",{"BV":5.0,"OK":15.0,"SS":4.0,"SV":4.0}],["JS","ext","A",{"BV":5.4,"OK":28.5,"ST":18.0}],["HG","ext","A",{"BV":5.4,"OK":28.5,"SS":6.0}],["TSM","ext","A",{"BV":5.4,"OK":28.5,"SS":6.0}],["TS","ext","A",{"BV":3.8,"OK":11.3,"SS":3.0,"SV":3.0}]],"0394":[["G1","int","B",{"OK":14.0,"RB":2.5,"SS":13.0}],["EW","int","A",{"OK":13.6,"RB":2.7,"SS":14.3}],["JP","int","A",{"OK":17.88,"RB":3.25,"SS":18.73}],["JS","ext","B",{"OK":14.0,"RB":2.5,"SS":13.0}],["TSM","ext","B",{"OK":14.0,"RB":2.5,"SS":13.0}],["TS","ext","A",{"OK":13.6,"RB":2.7,"SS":14.3}]],"1875":[["G1","int","A",{"OK":5.5,"RE":1.0,"SV":8.5}],["EW","int","A",{"OK":3.3,"RE":0.6,"SV":6.1}],["JP","int","A",{"OK":4.4,"RE":0.8,"SV":8.1}],["JS","ext","A",{"OK":5.5,"RE":1.0,"ST":4.2}],["TSM","ext","A",{"OK":5.5,"RE":1.0,"SV":8.5}],["TS","ext","A",{"OK":3.3,"RE":0.6,"SV":6.1}]],"2951":[["G1a","int","C",{"HT":62.0,"OK":29.0,"RB":78.0,"SS":34.0}],["G1b","int","C",{"HT":50.0,"OK":29.0,"RB":88.0,"SS":42.0}],["EW","int","C",{"HT":37.5,"OK":21.7,"RB":66.0,"SS":31.5}],["JS","ext","C",{"HT":50.0,"OK":29.0,"RB":88.0,"SS":42.0}],["TSM","ext","C",{"HT":50.0,"OK":29.0,"RB":88.0,"SS":42.0}],["TS","ext","C",{"HT":37.5,"OK":21.7,"RB":66.0,"SS":31.5}]],"1352":[["G1","int","B",{"OK":24.0,"RB":5.0,"SS":26.0}],["EW","int","A",{"OK":25.6,"RB":4.3,"SS":34.5}],["JP","int","A",{"OK":34.2,"RB":5.7,"SS":46.0}],["JS","ext","B",{"OK":24.0,"RB":5.0,"SS":26.0}],["TSM","ext","B",{"OK":24.0,"RB":5.0,"SS":26.0}],["TS","ext","A",{"OK":25.6,"RB":4.3,"SS":34.5}]],"1017":[["G1","int","A",{"OK":47.3,"RB":1.0,"SV":3.8}],["EW","int","A",{"OK":23.5,"SV":4.4,"RY":1.9}],["JP","int","A",{"OK":31.3,"SV":5.8,"RY":2.5}],["JS","ext","A",{"OK":47.3,"RB":1.0,"ST":1.9}],["TSM","ext","A",{"OK":47.3,"RB":1.0,"SV":3.8}],["TS","ext","A",{"OK":23.5,"SV":4.4,"RY":1.9}],["WG","ext","A",{"OK":23.5,"SV":4.4,"RY":1.9}]],"1235":[["G1","int","A",{"OK":9.0,"RE":1.5,"SV":12.5}],["EW","int","A",{"OK":3.9,"RB":0.3,"SS":1.2}],["JP","int","A",{"OK":6.24,"RE":0.7,"SV":12.62}],["JS","ext","A",{"OK":9.0,"RE":1.5,"ST":6.3}],["TSM","ext","A",{"OK":9.0,"RE":1.5,"SV":12.5}],["TS","ext","A",{"OK":3.9,"RB":0.3,"SS":1.2}]],"10961":[["G1","int","B",{"OK":25.9,"RB":2.2,"SS":7.8}],["EW","int","A",{"OK":29.03,"RB":2.49,"SS":10.0}],["JS","ext","B",{"OK":25.9,"RB":2.2,"ST":23.4}],["TSM","ext","B",{"OK":25.9,"RB":2.2,"SS":7.8}],["TS","ext","A",{"OK":29.03,"RB":2.49,"SS":10.0}]],"4468":[["G1","int","A",{"BV":4.6,"FS":2.9,"RB":0.7,"SS":4.0}],["EW","int","A",{"BV":2.6,"FS":2.3,"SS":2.8}],["JP","int","A",{"BV":3.4,"FS":3.0,"SS":3.7}],["JS","ext","B",{"BV":6.0,"RE":11.5}],["TSM","ext","B",{"BV":6.0,"RE":11.5}],["TS","ext","A",{"BV":2.6,"FS":2.3,"SS":2.8}]],"1001":[["G1","int","A",{"OK":1.0,"SV":2.0}],["EW","int","AA",{"OK":1.1,"SV":3.4}],["JP","int","A",{"OK":1.0,"SV":3.0}],["JS","ext","A",{"OK":1.2,"ST":1.5}],["TSM","ext","A",{"OK":1.0,"SV":2.0}],["TS","ext","AA",{"OK":1.1,"SV":3.4}]],"10342":[["G1","int","A",{"OK":24.0,"RB":4.5,"SS":18.0}],["EW","int","A",{"OK":10.3,"RB":2.3,"SS":11.4}],["JP","int","A",{"OK":13.7,"RB":3.0,"SS":15.2}],["JS","ext","A",{"OK":24.0,"RB":4.5,"ST":54.0}],["TSM","ext","A",{"OK":24.0,"RB":4.5,"SS":18.0}],["TS","ext","A",{"OK":10.3,"RB":2.3,"SS":11.4}],["WG","ext","A",{"OK":10.3,"RB":2.3,"SS":11.4}]],"1177":[["G1","int","A",{"OK":58.0,"RB":5.0,"SV":2.0}],["EW","int","A",{"OK":29.3,"RB":4.0,"SV":3.6}],["JP","int","A",{"OK":45.2,"RB":6.5,"SV":4.2}],["JS","ext","A",{"OK":58.0,"RB":5.0,"ST":1.0}],["TSM","ext","A",{"OK":58.0,"RB":5.0,"SV":2.0}],["TS","ext","A",{"OK":29.3,"RB":4.0,"SV":3.6}]],"WHITE":[["G1","int","White",{}],["EW","int","White",{}],["JP","int","White",{}],["JS","ext","White",{}],["TSM","ext","White",{}],["TS","ext","White",{}],["WG","ext","White",{}]]}};
+const F = 0.0030802080035209657/10;
 const PRODUCTS = {
   "Exterior": [
-    { name: "Jotashield Infinity",    tagline: "Ketahanan 15 Tahun",                  packs: ["20L","2.5L"] },
-    { name: "Jotashield Ultra Clean", tagline: "Ketahanan 8 Tahun (Self-Cleaning)",   packs: ["20L","2.5L"] },
-    { name: "Jotashield Antifade",    tagline: "Ketahanan 8 Tahun",                   packs: ["20L","2.5L"] },
-    { name: "Jotashield Flex",        tagline: "Ketahanan 6 Tahun Anti Retak",        packs: ["20L","2.5L"] },
-    { name: "Tough Shield Max",       tagline: "Ketahanan 4 Tahun",                   packs: ["18L","3.5L"] },
-    { name: "Tough Shield Matt",      tagline: "Ketahanan 3 Tahun",                   packs: ["18L","3.5L"] },
-    { name: "Waterguard",             tagline: "Cat Waterproofing",                   packs: ["15L","3.5L","0.9L"] },
-    { name: "Jotaroof",               tagline: "Cat untuk Atap",                      packs: ["20L","2.5L"] },
+    { name: "Jotashield Infinity",    tagline: "Ketahanan 15 Tahun",                  packs: ["20L","2.5L"], db:"JOTASHIELD INFINITY", area:"ext" },
+    { name: "Jotashield Ultra Clean", tagline: "Ketahanan 8 Tahun (Self-Cleaning)",   packs: ["20L","2.5L"], db:"JOTASHIELD ULTRA CLEAN", area:"ext" },
+    { name: "Jotashield Antifade",    tagline: "Ketahanan 8 Tahun",                   packs: ["20L","2.5L"], db:"JOTASHIELD ANTIFADE COLOURS", area:"ext" },
+    { name: "Jotashield Flex",        tagline: "Ketahanan 6 Tahun Anti Retak",        packs: ["20L","2.5L"], db:"JOTASHIELD FLEX", area:"ext", noBase:["Bright Yellow","Golden Yellow"] },
+    { name: "Tough Shield Max",       tagline: "Ketahanan 4 Tahun",                   packs: ["18L","3.5L"], db:"TOUGH SHIELD MAX", area:"ext" },
+    { name: "Tough Shield Matt",      tagline: "Ketahanan 3 Tahun",                   packs: ["18L","3.5L"], db:"TOUGH SHIELD", area:"ext" },
+    { name: "Waterguard",             tagline: "Cat Waterproofing",                   packs: ["15L","3.5L","0.9L"], db:"WATERGUARD", area:"ext" },
+    { name: "Jotaroof",               tagline: "Cat untuk Atap",                      packs: ["20L","2.5L"], db:"JOTAROOF HR", area:"ext" },
   ],
   "Interior": [
-    { name: "Majestic Pure Color",    tagline: "Tampilan Super Matt",                  packs: ["20L","2.5L"] },
-    { name: "Majestic Sense",         tagline: "Tampilan Kilat (Clean Air Technology)",packs: ["20L","2.5L"] },
-    { name: "Majestic True Beauty Sheen", tagline: "Tampilan Kilat",                       packs: ["20L","2.5L"] },
-    { name: "Majestic True Beauty Matt",  tagline: "Tampilan Doff",                        packs: ["20L","2.5L"] },
-    { name: "Essence Cover Plus",     tagline: "Tampilan Kilat",                       packs: ["18L","3.5L"] },
-    { name: "Essence Easy Wipe",      tagline: "Tampilan Doff",                        packs: ["18L","3.5L"] },
-    { name: "Jotaplast",              tagline: "Tampilan Doff",                        packs: ["18L","3.5L"] },
+    { name: "Majestic Pure Color",    tagline: "Tampilan Super Matt",                  packs: ["20L","2.5L"], db:"MAJESTIC PURE COLOR", area:"int" },
+    { name: "Majestic Sense",         tagline: "Tampilan Kilat (Clean Air Technology)",packs: ["20L","2.5L"], db:"MAJESTIC SENSE", area:"int" },
+    { name: "Majestic True Beauty Sheen", tagline: "Tampilan Kilat",                       packs: ["20L","2.5L"], db:"MAJESTIC TRUE BEAUTY SHEEN", area:"int" },
+    { name: "Majestic True Beauty Matt",  tagline: "Tampilan Doff",                        packs: ["20L","2.5L"], db:"MAJESTIC TRUE BEAUTY MATT", area:"int" },
+    { name: "Essence Cover Plus",     tagline: "Tampilan Kilat",                       packs: ["18L","3.5L"], db:"ESSENCE COVERPLUS SHEEN", area:"int" },
+    { name: "Essence Easy Wipe",      tagline: "Tampilan Doff",                        packs: ["18L","3.5L"], db:"ESSENCE EASY WIPE", area:"int" },
+    { name: "Jotaplast",              tagline: "Tampilan Doff",                        packs: ["18L","3.5L"], db:"JOTAPLAST", area:"int" },
   ],
   "Primer": [
-    { name: "Cito Primer",          tagline: "", packs: ["20L","2.5L"], def: {"2.5L":303200,"20L":2369100} },
-    { name: "Ultra Primer",         tagline: "", packs: ["20L","2.5L"], def: {"2.5L":248900,"20L":1885500} },
-    { name: "Jotashield Primer",    tagline: "", packs: ["20L","2.5L"], def: {"2.5L":184250,"20L":1401200} },
-    { name: "Majestic Primer",      tagline: "", packs: ["20L","2.5L"], def: {"2.5L":173000,"20L":1286800} },
-    { name: "Tough Shield Primer",  tagline: "", packs: ["18L","3.5L"], def: {"3.5L":217500,"18L":1013500} },
-    { name: "Essence Easy Primer",  tagline: "", packs: ["18L","3.5L"], def: {"3.5L":206600,"18L":962700} },
-    { name: "Jotaplast Primer",     tagline: "", packs: ["18L","3.5L"], def: {"3.5L":145800,"18L":645600} },
-    { name: "Gardex Primer",        tagline: "", packs: ["5L","1L"], def: {"1L":99200,"5L":530200} },
+    { name: "Cito Primer",          tagline: "", packs: ["20L","2.5L"], db:"CITOPRIMER 09", plain:true },
+    { name: "Ultra Primer",         tagline: "", packs: ["20L","2.5L"], db:"ULTRA PRIMER", plain:true },
+    { name: "Jotashield Primer",    tagline: "", packs: ["20L","2.5L"], db:"JOTASHIELD PRIMER", plain:true },
+    { name: "Majestic Primer",      tagline: "", packs: ["20L","2.5L"], db:"MAJESTIC PRIMER (For WALLS)", plain:true },
+    { name: "Tough Shield Primer",  tagline: "", packs: ["18L","3.5L"], db:"TOUGH SHIELD PRIMER", plain:true },
+    { name: "Essence Easy Primer",  tagline: "", packs: ["18L","3.5L"], db:"ESSENCE EASY PRIMER", plain:true },
+    { name: "Jotaplast Primer",     tagline: "", packs: ["18L","3.5L"], db:"JOTAPLAST PRIMER", plain:true },
+    { name: "Gardex Primer",        tagline: "", packs: ["5L","1L"], db:"GARDEX PRIMER / ZINC Phosphate", plain:true },
   ],
   "W&M": [
-    { name: "Gardex Premium Gloss",    tagline: "Cat Kayu dan Besi Solvent Based", packs: ["5L","0.9L"] },
-    { name: "Majestic Supreme Finish", tagline: "Cat Kayu dan Besi Water Based",   packs: ["5L","0.9L"] },
+    { name: "Gardex Premium Gloss",    tagline: "Cat Kayu dan Besi Solvent Based", packs: ["5L","0.9L"], db:"GARDEX PREMIUM GLOSS/SEMI GLOSS", area:"int" },
+    { name: "Majestic Supreme Finish", tagline: "Cat Kayu dan Besi Water Based",   packs: ["5L","0.9L"], db:"MAJESTIC SUPREME W&M GLOSS", area:"int" },
   ],
   "W&M Primer": [
-    { name: "Majestic Primer W&M", tagline: "", packs: ["5L","1L"], def: {"1L":102300,"5L":463500} },
+    { name: "Majestic Primer W&M", tagline: "", packs: ["5L","1L"], db:"MAJESTIC PRIMER WOOD AND TRIMS", plain:true },
   ],
 };
-
 const CATEGORIES = Object.keys(PRODUCTS);
+const GROUP_RANK = { G1Y:0, G1a:1, G1b:1, G1:2 };
 let colorCount = 0;
+let priceDate = (new Date() >= new Date(2026,11,1)) ? 1 : 0;
+const STATE = {};   // id -> { code, edits:{key:value} }
 
-function fmtPrice(raw, disc) {
-  const n = parseFloat(raw);
-  if (!raw || isNaN(n)) return null;
-  const discounted = disc > 0 ? n * (1 - disc / 100) : n;
-  return 'Rp ' + Math.round(discounted).toLocaleString('id-ID');
+/* ── Price engine ── */
+function packL(p) { return parseFloat(p); }
+function findRecipe(code, prod) {
+  const rows = (DB.fm[code] || []).filter(r => r[1] === prod.area && (DB.gp[r[0]] || []).includes(prod.db));
+  if (!rows.length) return null;
+  rows.sort((a,b) => (GROUP_RANK[a[0]] ?? 3) - (GROUP_RANK[b[0]] ?? 3));
+  return rows[0];
+}
+function bpLookup(db, base, L) {
+  return DB.bp[`${db}|${base}|${L}`] || (L === 1 ? DB.bp[`${db}|${base}|0.9`] : null);
+}
+function autoPrice(code, prod, pack) {
+  if (prod.plain) {
+    const bp = bpLookup(prod.db, '-', packL(pack));
+    return bp ? { ok:true, price: bp[priceDate] } : { ok:false, why:'' };
+  }
+  if (!code || !prod.db) return { ok:false, why:'' };
+  const r = findRecipe(code, prod);
+  if (!r) return { ok:false, why:'Tidak tersedia untuk warna ini' };
+  const [grp, area, base, q] = r;
+  if (prod.noBase && prod.noBase.includes(base)) return { ok:false, why:'Tidak diproduksi untuk base ' + base };
+  const L = packL(pack);
+  const bp = bpLookup(prod.db, base, L);
+  if (!bp) return { ok:false, why:'Tidak tersedia untuk warna ini' };
+  let c = 0;
+  for (const k in q) c += q[k] * F * L * DB.col[k];
+  c = Math.round(c * 100) / 100;
+  return { ok:true, price: Math.round((bp[priceDate] + c) * 100) / 100, base };
 }
 
+/* ── Formatting ── */
+function fmtPrice(raw, disc) {
+  const n = parseFloat(raw);
+  if (raw === '' || raw == null || isNaN(n)) return null;
+  const v = Math.round((disc > 0 ? n * (1 - disc / 100) : n) * 100) / 100;
+  const whole = Number.isInteger(v);
+  return 'Rp ' + v.toLocaleString('id-ID', { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 });
+}
+
+/* ── Date switch ── */
+function setDate(d) {
+  priceDate = d;
+  document.getElementById('d-now').classList.toggle('active', d === 0);
+  document.getElementById('d-dec').classList.toggle('active', d === 1);
+  Object.keys(STATE).forEach(id => { if (document.getElementById(`color-${id}`)) { renderPriceInputs(+id, getCurrentCat(+id)); updatePreview(+id); } });
+}
+
+/* ── Cards ── */
 function addColor() {
   colorCount++;
   const id = colorCount;
+  STATE[id] = { code:null, edits:{} };
   const container = document.getElementById('colors-container');
   const card = document.createElement('div');
   card.className = 'color-card';
   card.id = `color-${id}`;
-
   const catTabs = CATEGORIES.map((c, i) =>
-    `<div class="cat-tab ${i===0?'active':''}" onclick="selectCat(${id},'${c}',this)">${c}</div>`
-  ).join('');
-
+    `<div class="cat-tab ${i===0?'active':''}" onclick="selectCat(${id},'${c}',this)">${c}</div>`).join('');
   card.innerHTML = `
     <div class="color-card-header">
       <span class="color-card-num">COLOR #${id}</span>
@@ -313,13 +382,18 @@ function addColor() {
       <div class="field-row">
         <div class="field">
           <label>Color Name</label>
-          <input id="cname-${id}" placeholder="e.g. Light Antique" oninput="updatePreview(${id})">
+          <input id="cname-${id}" placeholder="e.g. Light Antique" autocomplete="off"
+                 oninput="onColorInput(${id},this)" onkeydown="suggestKey(${id},event)" onblur="hideSuggest(${id})">
+          <div class="suggest" id="sug-cname-${id}" hidden></div>
         </div>
         <div class="field">
           <label>Color Code</label>
-          <input id="ccode-${id}" placeholder="e.g. 0471" oninput="updatePreview(${id})">
+          <input id="ccode-${id}" placeholder="e.g. 0471" autocomplete="off"
+                 oninput="onColorInput(${id},this)" onkeydown="suggestKey(${id},event)" onblur="hideSuggest(${id})">
+          <div class="suggest" id="sug-ccode-${id}" hidden></div>
         </div>
       </div>
+      <div class="db-status" id="status-${id}" hidden></div>
 
       <div class="section-label">Category</div>
       <div class="cat-tabs" id="cat-tabs-${id}">${catTabs}</div>
@@ -344,87 +418,143 @@ function addColor() {
         <span>📋</span> Copy to WhatsApp
       </button>
     </div>`;
-
   container.appendChild(card);
-  // Init with first category
   renderToggles(id, CATEGORIES[0]);
   card.querySelector(`#cname-${id}`).focus();
 }
 
+/* ── Colour search ── */
+const COLOURS = Object.entries(DB.names).map(([code, name]) => ({ code, name }));
+function matches(q) {
+  q = q.trim().toLowerCase();
+  if (!q) return [];
+  const exact = [], starts = [], has = [];
+  for (const c of COLOURS) {
+    const code = c.code.toLowerCase(), name = c.name.toLowerCase();
+    if (code === q || name === q) exact.push(c);
+    else if (code.startsWith(q) || name.startsWith(q)) starts.push(c);
+    else if (code.includes(q) || name.includes(q)) has.push(c);
+  }
+  return exact.concat(starts, has).slice(0, 8);
+}
+function onColorInput(id, el) {
+  const which = el.id.startsWith('cname') ? 'cname' : 'ccode';
+  const q = el.value;
+  // exact code typed -> select directly
+  const exact = which === 'ccode' && DB.names[q.trim()] ? q.trim() : null;
+  if (exact) { chooseColour(id, exact); return; }
+  if (STATE[id].code) setColour(id, null);   // typing away from a chosen colour clears it
+  const list = matches(q);
+  const box = document.getElementById(`sug-${which}-${id}`);
+  if (!list.length) { box.hidden = true; updateStatus(id); updatePreview(id); return; }
+  box.innerHTML = list.map((c, i) =>
+    `<div class="${i===0?'hl':''}" onmousedown="chooseColour(${id},'${c.code}')"><b>${c.code}</b>${c.name}</div>`).join('');
+  box.hidden = false;
+  updateStatus(id); updatePreview(id);
+}
+function suggestKey(id, e) {
+  const box = [...document.querySelectorAll(`#color-${id} .suggest`)].find(b => !b.hidden);
+  if (!box) return;
+  const items = [...box.children]; let i = items.findIndex(x => x.classList.contains('hl'));
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); if (i >= 0) items[i].classList.remove('hl');
+    i = (i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length; items[i].classList.add('hl');
+  } else if (e.key === 'Enter' && i >= 0) { e.preventDefault(); items[i].dispatchEvent(new Event('mousedown')); }
+  else if (e.key === 'Escape') box.hidden = true;
+}
+function hideSuggest(id) { setTimeout(() => document.querySelectorAll(`#color-${id} .suggest`).forEach(b => b.hidden = true), 150); }
+function chooseColour(id, code) {
+  document.getElementById(`cname-${id}`).value = titleCase(DB.names[code]);
+  document.getElementById(`ccode-${id}`).value = code;
+  document.querySelectorAll(`#color-${id} .suggest`).forEach(b => b.hidden = true);
+  setColour(id, code);
+}
+function setColour(id, code) {
+  STATE[id].code = code; STATE[id].edits = {};
+  renderPriceInputs(id, getCurrentCat(id)); updateStatus(id); updatePreview(id);
+}
+function titleCase(s) { return s.toLowerCase().replace(/(^|[\s(-])\S/g, m => m.toUpperCase()); }
+function updateStatus(id) {
+  const el = document.getElementById(`status-${id}`);
+  const typed = document.getElementById(`cname-${id}`).value.trim() || document.getElementById(`ccode-${id}`).value.trim();
+  if (STATE[id].code) { el.className = 'db-status ok'; el.textContent = '✓ Ada di database · harga terisi otomatis (bisa diubah)'; el.hidden = false; }
+  else if (typed) { el.className = 'db-status no'; el.textContent = 'Tidak ada di database — isi harga manual'; el.hidden = false; }
+  else el.hidden = true;
+}
+
+/* ── Categories & products ── */
 function selectCat(id, cat, el) {
-  const tabs = document.querySelectorAll(`#cat-tabs-${id} .cat-tab`);
-  tabs.forEach(t => t.classList.remove('active'));
+  document.querySelectorAll(`#cat-tabs-${id} .cat-tab`).forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   renderToggles(id, cat);
 }
-
 function getCurrentCat(id) {
   const active = document.querySelector(`#cat-tabs-${id} .cat-tab.active`);
   return active ? active.textContent.trim() : CATEGORIES[0];
 }
-
 function renderToggles(id, cat) {
   const prods = PRODUCTS[cat] || [];
-  const toggleContainer = document.getElementById(`prod-toggles-${id}`);
-  const pricesContainer = document.getElementById(`prod-prices-${id}`);
-
-  // Build toggles — default first 2 on
-  toggleContainer.innerHTML = prods.map((p, i) =>
-    `<div class="prod-toggle ${i < 2 ? 'on' : ''}" data-prod="${i}"
-          onclick="toggleProd(${id},${i},this)">${p.name}</div>`
-  ).join('');
-
-  pricesContainer.innerHTML = ''; // new category: don't carry the old category's prices over
+  document.getElementById(`prod-toggles-${id}`).innerHTML = prods.map((p, i) =>
+    `<div class="prod-toggle ${i < 2 ? 'on' : ''}" data-prod="${i}" onclick="toggleProd(${id},${i},this)">${p.name}</div>`).join('');
   renderPriceInputs(id, cat);
   updatePreview(id);
 }
-
 function toggleProd(id, idx, el) {
   el.classList.toggle('on');
   renderPriceInputs(id, getCurrentCat(id));
   updatePreview(id);
 }
-
+function keyOf(cat, i, pack) { return `${cat}|${i}|${pack}`; }
+function valueFor(id, cat, i, pack) {
+  const k = keyOf(cat, i, pack), st = STATE[id];
+  if (k in st.edits) return { v: st.edits[k], edited: true };
+  const a = autoPrice(st.code, PRODUCTS[cat][i], pack);
+  return a.ok ? { v: String(a.price), auto: true } : { v: '', why: a.why };
+}
 function renderPriceInputs(id, cat) {
   const prods = PRODUCTS[cat] || [];
   const container = document.getElementById(`prod-prices-${id}`);
   const toggles = document.querySelectorAll(`#prod-toggles-${id} .prod-toggle`);
-
-  // Save existing values before re-render
-  const saved = {};
-  prods.forEach((p, i) => {
-    p.packs.forEach(pack => {
-      const inp = document.getElementById(`price-${id}-${i}-${sanitize(pack)}`);
-      if (inp) saved[`${i}-${pack}`] = inp.value;
-    });
-  });
-
   let html = '';
   toggles.forEach((toggle, i) => {
     if (!toggle.classList.contains('on')) return;
     const p = prods[i];
-    const packInputs = p.packs.map(pack => `
-      <div class="pack-row">
+    let note = '', anyEdit = false;
+    const packInputs = p.packs.map(pack => {
+      const r = valueFor(id, cat, i, pack);
+      if (r.why && !note) note = r.why;
+      if (r.edited) anyEdit = true;
+      const cls = r.edited ? 'edited' : (r.auto ? 'auto' : '');
+      return `<div class="pack-row">
         <span class="pack-label">${pack}</span>
-        <input type="number" class="pack-input" id="price-${id}-${i}-${sanitize(pack)}"
-               placeholder="0" min="0"
-               value="${saved[`${i}-${pack}`] !== undefined ? saved[`${i}-${pack}`] : (p.def && p.def[pack] !== undefined ? p.def[pack] : '')}"
-               oninput="updatePreview(${id})">
-      </div>`).join('');
+        <input type="number" class="pack-input ${cls}" id="price-${id}-${i}-${sanitize(pack)}"
+               placeholder="0" min="0" step="0.01" value="${r.v}"
+               oninput="onPriceEdit(${id},'${cat}',${i},'${pack}',this)">
+      </div>`; }).join('');
+    const showNote = STATE[id].code && note && p.db;
     html += `<div class="prod-prices">
       <div class="prod-prices-header">
-        <span class="prod-prices-name">${p.name}</span>
-        ${p.tagline ? `<span class="prod-prices-tagline">${p.tagline}</span>` : ''}
+        <span class="prod-prices-name">${p.name}${anyEdit ? '<span class="edit-mark">● diubah</span>' : ''}</span>
+        ${anyEdit ? `<button class="reset-btn" onclick="resetProd(${id},'${cat}',${i})">reset</button>` :
+          (p.tagline ? `<span class="prod-prices-tagline">${p.tagline}</span>` : '')}
       </div>
-      <div class="prod-prices-body">${packInputs}</div>
+      <div class="prod-prices-body">${showNote ? `<div class="na-note">${note}</div>` : ''}${packInputs}</div>
     </div>`;
   });
-
   container.innerHTML = html || `<div style="font-size:12px;color:var(--muted);padding:8px 0">Select at least one product above.</div>`;
 }
-
+function onPriceEdit(id, cat, i, pack, el) {
+  STATE[id].edits[keyOf(cat, i, pack)] = el.value;
+  el.classList.remove('auto'); el.classList.add('edited');
+  updatePreview(id);
+}
+function resetProd(id, cat, i) {
+  PRODUCTS[cat][i].packs.forEach(pack => delete STATE[id].edits[keyOf(cat, i, pack)]);
+  renderPriceInputs(id, cat); updatePreview(id);
+}
 function sanitize(str) { return str.replace(/[^a-zA-Z0-9]/g, '_'); }
 
+/* ── Preview & copy ── */
 function buildPreviewText(id) {
   const cat     = getCurrentCat(id);
   const prods   = PRODUCTS[cat] || [];
@@ -432,26 +562,20 @@ function buildPreviewText(id) {
   const ccode   = document.getElementById(`ccode-${id}`)?.value.trim() || '';
   const disc    = parseFloat(document.getElementById(`disc-${id}`)?.value) || 0;
   const toggles = document.querySelectorAll(`#prod-toggles-${id} .prod-toggle`);
-
-  const colorLine = [cname, ccode].filter(Boolean).join(' ');
+  const colorLine = [cname, ccode === 'WHITE' ? '' : ccode].filter(Boolean).join(' ');
   let lines = [];
-  if (colorLine) lines.push(`*${colorLine}*`);
+  const isPrimer = cat.includes('Primer');
+  if (colorLine && !isPrimer) lines.push(`*${colorLine}*`);
   lines.push(cat);
   lines.push('');
-
   let hasAnyPrice = false;
   toggles.forEach((toggle, i) => {
     if (!toggle.classList.contains('on')) return;
     const p = prods[i];
     const packLines = [];
     p.packs.forEach(pack => {
-      const inp = document.getElementById(`price-${id}-${i}-${sanitize(pack)}`);
-      const raw = inp?.value || '';
-      const formatted = fmtPrice(raw, disc);
-      if (formatted) {
-        packLines.push(`${pack}  ${formatted}`);
-        hasAnyPrice = true;
-      }
+      const formatted = fmtPrice(valueFor(id, cat, i, pack).v, disc);
+      if (formatted) { packLines.push(`${pack}  ${formatted}`); hasAnyPrice = true; }
     });
     if (packLines.length) {
       lines.push(`*${p.name}*`);
@@ -460,57 +584,37 @@ function buildPreviewText(id) {
       lines.push('');
     }
   });
-
   if (!hasAnyPrice && lines.filter(l => l).length <= 2) return null;
-  // Remove trailing empty line
   while (lines.length && lines[lines.length-1] === '') lines.pop();
   return lines.join('\n');
 }
-
 function updatePreview(id) {
   const preview = document.getElementById(`preview-${id}`);
-  const text = buildPreviewText(id);
-  preview.textContent = text || '—';
+  if (!preview) return;
+  preview.textContent = buildPreviewText(id) || '—';
 }
-
+function flashCopied(id) {
+  const btn = document.getElementById(`copy-btn-${id}`);
+  btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+  setTimeout(() => { btn.innerHTML = '<span>📋</span> Copy to WhatsApp'; btn.classList.remove('copied'); }, 2000);
+}
 function copyColor(id) {
   const text = buildPreviewText(id);
-  if (!text || text === '—') return;
-
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById(`copy-btn-${id}`);
-    btn.textContent = '✓ Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.innerHTML = '<span>📋</span> Copy to WhatsApp';
-      btn.classList.remove('copied');
-    }, 2000);
-  }).catch(() => {
-    // Fallback for older browsers
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => flashCopied(id)).catch(() => {
     const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    const btn = document.getElementById(`copy-btn-${id}`);
-    btn.textContent = '✓ Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.innerHTML = '<span>📋</span> Copy to WhatsApp';
-      btn.classList.remove('copied');
-    }, 2000);
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    flashCopied(id);
   });
 }
-
 function deleteColor(id) {
   const card = document.getElementById(`color-${id}`);
   if (card) card.remove();
+  delete STATE[id];
 }
 
-// Start with one color
+setDate(priceDate);
 addColor();
 </script>
 </body>
