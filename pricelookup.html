@@ -31,7 +31,7 @@ header { background: var(--text); padding: 18px 20px 16px; }
 .cat-tab { padding: 11px 14px; font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0; transition: all 0.12s; }
 .cat-tab.active { color: var(--text); border-bottom-color: var(--text); }
 
-main { max-width: 700px; margin: 0 auto; padding: 16px 16px 60px; }
+main { max-width: 700px; margin: 0 auto; padding: 16px 16px 90px; }
 
 .product-group { margin-bottom: 20px; }
 .group-header { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; padding: 0 2px; }
@@ -60,12 +60,31 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 60px; }
 
 .empty-search { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 13px; display: none; }
 .ref-note { font-size: 10px; color: var(--dim); text-align: center; padding: 16px; line-height: 1.6; }
-.disc-bar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 0.5px solid var(--border); background: var(--bg); }
-.disc-toggle { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border2); background: #fff; color: var(--text); cursor: pointer; }
-.disc-toggle.on { background: var(--text); color: #fff; border-color: var(--text); }
-.disc-active { font-size: 11px; color: #92400E; font-weight: 600; font-family: 'Space Grotesk', sans-serif; }
-.disc-clear { font-size: 11px; color: #991B1B; cursor: pointer; margin-left: auto; font-weight: 600; }
-.disc-panel { display: none; padding: 12px 16px 14px; background: #FFFBEB; border-bottom: 0.5px solid #F0E0C0; }
+.disc-fab { position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 60;
+  display: flex; align-items: center; gap: 6px; padding: 11px 16px; border-radius: 24px; border: none;
+  background: var(--text); color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22); cursor: pointer; }
+.disc-fab.on { background: #166534; }
+.disc-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 70; display: none; }
+.disc-backdrop.open { display: block; }
+.disc-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 71; background: var(--surface);
+  border-radius: 16px 16px 0 0; padding: 16px 16px calc(18px + env(safe-area-inset-bottom)); max-width: 700px; margin: 0 auto;
+  transform: translateY(105%); transition: transform 0.2s ease; box-shadow: 0 -4px 20px rgba(0,0,0,0.12); }
+.disc-sheet.open { transform: translateY(0); }
+.sheet-head { display: flex; align-items: center; margin-bottom: 12px; }
+.sheet-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; flex: 1; }
+.sheet-close { border: none; background: none; font-size: 22px; color: var(--muted); cursor: pointer; line-height: 1; }
+.master-row { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 12px; }
+.master-row label { font-size: 13px; color: var(--muted); flex: 1; font-weight: 500; }
+.master-row input { width: 70px; border: none; background: transparent; font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600; text-align: right; color: var(--text); }
+.master-row input:focus { outline: none; }
+.master-row input::-webkit-outer-spin-button, .master-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.master-row span { font-size: 16px; color: var(--muted); }
+.chips { display: flex; gap: 6px; margin: 10px 0 4px; flex-wrap: wrap; }
+.chip { padding: 7px 13px; border-radius: 16px; border: 1px solid var(--border2); background: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
+.chip.clear { color: #991B1B; border-color: #F0C8C8; margin-left: auto; }
+.cat-link { font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 10px 0 8px; text-decoration: underline; }
+.disc-panel { display: none; }
 .disc-panel.open { display: block; }
 .disc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 8px; }
 .disc-cell { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #F0E0C0; border-radius: 8px; padding: 6px 9px; }
@@ -103,14 +122,24 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 60px; }
   <div class="cat-tab" onclick="filterCat('tinter',this)">Tinter</div>
 </div>
 
-<div class="disc-bar">
-  <button class="disc-toggle" id="disc-toggle" onclick="toggleDisc()">Discount</button>
-  <span class="disc-active" id="disc-active"></span>
-  <span class="disc-clear" id="disc-clear" style="display:none" onclick="clearDisc()">Clear all</span>
-</div>
-<div class="disc-panel" id="disc-panel">
-  <div class="disc-grid" id="disc-grid"></div>
-  <div class="disc-hint">Net prices shown in green with the list price struck through. Resets every time you open this page.</div>
+<button class="disc-fab" id="disc-fab" onclick="openSheet()">% Diskon</button>
+<div class="disc-backdrop" id="disc-backdrop" onclick="closeSheet()"></div>
+<div class="disc-sheet" id="disc-sheet">
+  <div class="sheet-head"><div class="sheet-title">Diskon</div><button class="sheet-close" onclick="closeSheet()">×</button></div>
+  <div class="master-row"><label>Semua produk</label>
+    <input type="number" id="d-master" min="0" max="100" step="0.5" placeholder="0" inputmode="decimal" oninput="setMaster(this.value)"><span>%</span></div>
+  <div class="chips">
+    <button class="chip" onclick="setMaster(5,true)">5%</button>
+    <button class="chip" onclick="setMaster(10,true)">10%</button>
+    <button class="chip" onclick="setMaster(15,true)">15%</button>
+    <button class="chip" onclick="setMaster(20,true)">20%</button>
+    <button class="chip clear" onclick="clearDisc()">Hapus</button>
+  </div>
+  <button class="cat-link" id="cat-link" onclick="toggleDisc()">Atur per kategori ▸</button>
+  <div class="disc-panel" id="disc-panel">
+    <div class="disc-grid" id="disc-grid"></div>
+    <div class="disc-hint">Kosong = ikut diskon semua produk. Harga net hijau, harga list dicoret. Reset setiap halaman dibuka.</div>
+  </div>
 </div>
 
 <main>
@@ -122,11 +151,13 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 60px; }
 <script>
 const fmt = n => n ? n.toLocaleString('id-ID') : '—';
 
-// Per-category discount. Deliberately NOT persisted - resets on every open.
-const DISC = { exterior:0, interior:0, oldstock:0, wm:0, primer:0, thinner:0, tinter:0 };
+// Discount: one master % for everything, optional per-category override. Not persisted - resets on every open.
+let MASTER = 0;
+const OVR = { exterior:null, interior:null, oldstock:null, wm:null, primer:null, thinner:null, tinter:null };
 const DISC_LABELS = { exterior:'Exterior', interior:'Interior', oldstock:'Old Stock', wm:'W&M', primer:'Primer', thinner:'Thinner', tinter:'Tinter' };
+function discOf(cat) { return OVR[cat] !== null && OVR[cat] !== undefined ? OVR[cat] : MASTER; }
 function net(price, cat) {
-  const d = DISC[cat] || 0;
+  const d = discOf(cat);
   if (!price || !d) return null;
   return price * (1 - d / 100);
 }
@@ -136,39 +167,47 @@ function priceCell(price, cat, cls) {
   if (n === null) return `<div class="${cls}">${fmt(price)}</div>`;
   return `<div class="price-was">${fmt(price)}</div><div class="${cls} net">${fmt(Math.round(n))}</div>`;
 }
+function clampPct(val) { let v = parseFloat(val); if (isNaN(v) || v < 0) v = 0; if (v > 100) v = 100; return v; }
 function buildDiscGrid() {
   document.getElementById('disc-grid').innerHTML = Object.keys(DISC_LABELS).map(k =>
-    `<div class="disc-cell"><label>${DISC_LABELS[k]}</label><input type="number" id="d-${k}" min="0" max="100" step="0.5" placeholder="0" value="${DISC[k]||''}" oninput="setDisc('${k}',this.value)"><span>%</span></div>`
+    `<div class="disc-cell"><label>${DISC_LABELS[k]}</label><input type="number" id="d-${k}" min="0" max="100" step="0.5" placeholder="${MASTER||0}" value="${OVR[k]===null?'':OVR[k]}" oninput="setDisc('${k}',this.value)"><span>%</span></div>`
   ).join('');
 }
+function refresh() { renderAll(); applyFilters(); updDiscBar(); }
+function setMaster(val, fromChip) {
+  MASTER = clampPct(val);
+  if (fromChip) document.getElementById('d-master').value = MASTER || '';
+  Object.keys(DISC_LABELS).forEach(k => { const el = document.getElementById('d-' + k); if (el) el.placeholder = MASTER || 0; });
+  refresh();
+}
 function setDisc(cat, val) {
-  let v = parseFloat(val);
-  if (isNaN(v) || v < 0) v = 0;
-  if (v > 100) v = 100;
-  DISC[cat] = v;
-  renderAll();
-  applyFilters();
-  updDiscBar();
+  OVR[cat] = (val === '' || val === null) ? null : clampPct(val);
+  refresh();
 }
 function updDiscBar() {
-  const on = Object.keys(DISC).filter(k => DISC[k] > 0);
-  const bar = document.getElementById('disc-active');
-  const clr = document.getElementById('disc-clear');
-  const tog = document.getElementById('disc-toggle');
-  if (!on.length) { bar.textContent = ''; clr.style.display = 'none'; tog.classList.remove('on'); return; }
-  bar.textContent = on.map(k => DISC_LABELS[k] + ' −' + DISC[k] + '%').join('  ·  ');
-  clr.style.display = 'inline';
-  tog.classList.add('on');
+  const fab = document.getElementById('disc-fab');
+  const over = Object.keys(OVR).filter(k => OVR[k] !== null);
+  if (!MASTER && !over.some(k => OVR[k] > 0)) { fab.textContent = '% Diskon'; fab.classList.remove('on'); return; }
+  fab.textContent = (MASTER ? '−' + MASTER + '%' : 'Diskon') + (over.length ? ' · ' + over.length + ' kategori' : '');
+  fab.classList.add('on');
+}
+function openSheet() {
+  document.getElementById('disc-sheet').classList.add('open');
+  document.getElementById('disc-backdrop').classList.add('open');
+}
+function closeSheet() {
+  document.getElementById('disc-sheet').classList.remove('open');
+  document.getElementById('disc-backdrop').classList.remove('open');
 }
 function toggleDisc() {
-  document.getElementById('disc-panel').classList.toggle('open');
+  const p = document.getElementById('disc-panel');
+  p.classList.toggle('open');
+  document.getElementById('cat-link').textContent = p.classList.contains('open') ? 'Atur per kategori ▾' : 'Atur per kategori ▸';
 }
 function clearDisc() {
-  Object.keys(DISC).forEach(k => DISC[k] = 0);
-  buildDiscGrid();
-  renderAll();
-  applyFilters();
-  updDiscBar();
+  MASTER = 0; Object.keys(OVR).forEach(k => OVR[k] = null);
+  document.getElementById('d-master').value = '';
+  buildDiscGrid(); refresh();
 }
 
 const DATA = {
