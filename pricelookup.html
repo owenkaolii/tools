@@ -86,6 +86,10 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 90px; }
 .price-was { font-size: 10.5px; color: var(--dim); text-decoration: line-through; font-family: 'Space Grotesk', sans-serif; font-weight: 400; }
 .pack-price.net, .tinter-price.net { color: #166534; }
 .net-flag { display: inline-block; font-size: 8.5px; font-weight: 700; color: #92400E; letter-spacing: 0.3px; margin-left: 4px; vertical-align: middle; }
+.date-switch { display:flex; gap:6px; margin-top:10px; }
+.date-opt { padding:5px 11px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer;
+  border:0.5px solid rgba(255,255,255,0.3); color:rgba(255,255,255,0.6); background:none; font-family:'DM Sans',sans-serif; }
+.date-opt.active { background:#fff; color:var(--text); border-color:#fff; }
 </style>
 </head>
 <body>
@@ -93,7 +97,11 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 90px; }
 <header>
   <a class="home-btn" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>Tools</a>
   <div class="header-title">Pricelist</div>
-  <div class="header-sub">Jotun Decorative · Effective 24 Oct 2026</div>
+  <div class="header-sub" id="hdr-sub">Jotun Decorative · Effective 24 Oct 2026</div>
+  <div class="date-switch">
+    <button class="date-opt" id="d-now" onclick="setDate(0)">Harga 24 Okt 2026</button>
+    <button class="date-opt" id="d-dec" onclick="setDate(1)">Harga 1 Des 2026</button>
+  </div>
 </header>
 
 <div class="search-bar">
@@ -129,7 +137,7 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 90px; }
 <main>
   <div id="product-list"></div>
   <div class="empty-search" id="empty-search">No products found.</div>
-  <div class="ref-note">Ref: 2809/JILD/1026/JVSMKS · All prices include VAT 11% · List prices exclude regular discount<br>Tinter prices and Old Stock prices from the 15 May 2026 list (Ref: 1070/JILD/0426/JVSMKS)</div>
+  <div class="ref-note"><span id="ref-no">Ref: 2809/JILD/1026/JVSMKS</span> · All prices include VAT 11% · List prices exclude regular discount<br>Tinter prices and Old Stock prices from the 15 May 2026 list (Ref: 1070/JILD/0426/JVSMKS)</div>
 </main>
 
 <script>
@@ -466,7 +474,29 @@ function applyFilters() {
   document.getElementById('empty-search').style.display = anyVisible ? 'none' : 'block';
 }
 
-renderAll();
+// 1 Dec 2026 list (Ref 3195/JILD/1126/JVSMKS). Old Stock and Tinter keep their 15 May prices.
+const DEC = {"Jotashield Infinity|White|2.5L": 550300, "Jotashield Infinity|White|20L": 3884600, "Jotashield Infinity|Base A|2.5L": 539600, "Jotashield Infinity|Base A|20L": 3823400, "Jotashield Infinity|Base B|2.5L": 504600, "Jotashield Infinity|Base B|20L": 3501200, "Jotashield Infinity|Base C|2.5L": 483700, "Jotashield Infinity|Base C|20L": 3280200, "Jotashield Ultra Clean|White|2.5L": 470300, "Jotashield Ultra Clean|White|20L": 3465800, "Jotashield Ultra Clean|Base A|2.5L": 462500, "Jotashield Ultra Clean|Base A|20L": 3279600, "Jotashield Ultra Clean|Base B|2.5L": 432500, "Jotashield Ultra Clean|Base B|20L": 3002500, "Jotashield Ultra Clean|Base C|2.5L": 414900, "Jotashield Ultra Clean|Base C|20L": 2812950, "Jotashield Flex|White|2.5L": 468200, "Jotashield Flex|White|20L": 3429500, "Jotashield Flex|Base A|2.5L": 473550, "Jotashield Flex|Base A|20L": 3384900, "Jotashield Flex|Base B|2.5L": 426300, "Jotashield Flex|Base B|20L": 2879300, "Jotashield Flex|Base C|2.5L": 408000, "Jotashield Flex|Base C|20L": 2696400, "Jotashield Antifade|White|2.5L": 454100, "Jotashield Antifade|White|20L": 3347700, "Jotashield Antifade|Base A|2.5L": 416400, "Jotashield Antifade|Base A|20L": 3081850, "Jotashield Antifade|Base B|2.5L": 386000, "Jotashield Antifade|Base B|20L": 2688600, "Jotashield Antifade|Base C|2.5L": 366200, "Jotashield Antifade|Base C|20L": 2508450, "Jotashield Antifade|Base Bright Yellow|2.5L": 694800, "Jotashield Antifade|Base Bright Yellow|20L": 5180400, "Jotashield Antifade|Base Golden Yellow|2.5L": 569200, "Jotashield Antifade|Base Golden Yellow|20L": 4242700, "Jotashield Antifade|Jotashield Gold|1L": 403000, "Tough Shield Max|White|3.5L": 394800, "Tough Shield Max|White|18L": 1971500, "Tough Shield Max|Base A|3.5L": 367900, "Tough Shield Max|Base A|18L": 1854400, "Tough Shield Max|Base B|3.5L": 343500, "Tough Shield Max|Base B|18L": 1661900, "Tough Shield Max|Base C|3.5L": 306900, "Tough Shield Max|Base C|18L": 1510950, "Tough Shield|White|3.5L": 277500, "Tough Shield|White|18L": 1266900, "Tough Shield|Base AA|3.5L": 257250, "Tough Shield|Base AA|18L": 1198200, "Tough Shield|Base A|3.5L": 241900, "Tough Shield|Base A|18L": 1125700, "Tough Shield|Base C|3.5L": 200200, "Tough Shield|Base C|18L": 928400, "Waterguard|White|1L": 106900, "Waterguard|White|3.5L": 373800, "Waterguard|White|15L": 1573950, "Waterguard|Black|1L": 106900, "Waterguard|Black|3.5L": 373800, "Waterguard|Black|15L": 1573950, "Waterguard|Base AA|1L": 81500, "Waterguard|Base AA|3.5L": 283900, "Waterguard|Base AA|15L": 1201400, "Waterguard|Base A|1L": 79000, "Waterguard|Base A|3.5L": 272800, "Waterguard|Base A|15L": 1150300, "Waterguard|Base C|1L": 72600, "Waterguard|Base C|3.5L": 250500, "Waterguard|Base C|15L": 1055900, "Pioneer 200 Matt|White & Standard Color|5L": 992500, "Pioneer 200 Matt|White & Standard Color|20L": 3721100, "Jotaroof HR|Base C|2.5L": 275200, "Jotaroof HR|Base C|20L": 2090400, "Majestic Pure Color|White|2.5L": 437000, "Majestic Pure Color|White|20L": 3131900, "Majestic Pure Color|Base A|2.5L": 410100, "Majestic Pure Color|Base A|20L": 3044800, "Majestic Pure Color|Base B|2.5L": 376200, "Majestic Pure Color|Base B|20L": 2665400, "Majestic Pure Color|Base C|2.5L": 356100, "Majestic Pure Color|Base C|20L": 2476400, "Majestic Sense|White|2.5L": 400400, "Majestic Sense|White|20L": 2874900, "Majestic Sense|Base A|2.5L": 379600, "Majestic Sense|Base A|20L": 2832700, "Majestic Sense|Base B|2.5L": 345200, "Majestic Sense|Base B|20L": 2492400, "Majestic Sense|Base C|2.5L": 326700, "Majestic Sense|Base C|20L": 2347600, "Majestic True Beauty Sheen|White|2.5L": 372100, "Majestic True Beauty Sheen|White|20L": 2530700, "Majestic True Beauty Sheen|Base A|2.5L": 348800, "Majestic True Beauty Sheen|Base A|20L": 2359300, "Majestic True Beauty Sheen|Base B|2.5L": 302300, "Majestic True Beauty Sheen|Base B|20L": 2216600, "Majestic True Beauty Sheen|Base C|2.5L": 277600, "Majestic True Beauty Sheen|Base C|20L": 2073000, "Majestic True Beauty Matt|White|2.5L": 372100, "Majestic True Beauty Matt|White|20L": 2530700, "Majestic True Beauty Matt|Base A|2.5L": 348800, "Majestic True Beauty Matt|Base A|20L": 2359300, "Majestic True Beauty Matt|Base B|2.5L": 302300, "Majestic True Beauty Matt|Base B|20L": 2216600, "Majestic True Beauty Matt|Base C|2.5L": 277600, "Majestic True Beauty Matt|Base C|20L": 2073000, "Essence Coverplus Sheen|White|3.5L": 341400, "Essence Coverplus Sheen|White|18L": 1499000, "Essence Coverplus Sheen|Base A|3.5L": 336100, "Essence Coverplus Sheen|Base A|18L": 1323200, "Essence Coverplus Sheen|Base B|3.5L": 317200, "Essence Coverplus Sheen|Base B|18L": 1225700, "Essence Coverplus Sheen|Base C|3.5L": 275900, "Essence Coverplus Sheen|Base C|18L": 1085000, "Essence Easy Wipe|White|3.5L": 258700, "Essence Easy Wipe|White|18L": 1199400, "Essence Easy Wipe|Base AA|3.5L": 233100, "Essence Easy Wipe|Base AA|18L": 1080900, "Essence Easy Wipe|Base A|3.5L": 227000, "Essence Easy Wipe|Base A|18L": 1051700, "Essence Easy Wipe|Base C|3.5L": 190300, "Essence Easy Wipe|Base C|18L": 879300, "Essence Easy Ceiling|White|3.5L": 242700, "Essence Easy Ceiling|White|18L": 1090000, "Essence Easy Ceiling|Celestial White|3.5L": 242700, "Essence Easy Ceiling|Celestial White|18L": 1090000, "Essence Easy Ceiling|Base A|3.5L": 195700, "Essence Easy Ceiling|Base A|18L": 877000, "Jotaplast|White|3.5L": 199400, "Jotaplast|White|18L": 902700, "Jotaplast|Base A|3.5L": 195700, "Jotaplast|Base A|18L": 877000, "Gardex Premium Gloss/Semi Gloss|White|0.9L": 140500, "Gardex Premium Gloss/Semi Gloss|White|5L": 705900, "Gardex Premium Gloss/Semi Gloss|Base A|0.9L": 138700, "Gardex Premium Gloss/Semi Gloss|Base A|5L": 693400, "Gardex Premium Gloss/Semi Gloss|Base B|0.9L": 129300, "Gardex Premium Gloss/Semi Gloss|Base B|5L": 645900, "Gardex Premium Gloss/Semi Gloss|Base C|0.9L": 115300, "Gardex Premium Gloss/Semi Gloss|Base C|5L": 576300, "Gardex Premium Gloss/Semi Gloss|Base Yellow|0.9L": 159400, "Gardex Premium Gloss/Semi Gloss|Base Yellow|5L": 797100, "Essence Hi-Gloss|White|0.9L": 119900, "Essence Hi-Gloss|White|5L": 599550, "Essence Hi-Gloss|Black|0.9L": 119900, "Essence Hi-Gloss|Black|5L": 599550, "Essence Hi-Gloss|Base A|0.9L": 119100, "Essence Hi-Gloss|Base A|5L": 595800, "Essence Hi-Gloss|Base B|0.9L": 103800, "Essence Hi-Gloss|Base B|5L": 519200, "Essence Hi-Gloss|Base C|0.9L": 97300, "Essence Hi-Gloss|Base C|5L": 487000, "Majestic Supreme W&M Gloss|White|0.9L": 176300, "Majestic Supreme W&M Gloss|White|5L": 879500, "Majestic Supreme W&M Gloss|Base A|0.9L": 167800, "Majestic Supreme W&M Gloss|Base A|5L": 836500, "Majestic Supreme W&M Gloss|Base B|0.9L": 147000, "Majestic Supreme W&M Gloss|Base B|5L": 731700, "Majestic Supreme W&M Gloss|Base C|0.9L": 138400, "Majestic Supreme W&M Gloss|Base C|5L": 691400, "Majestic Supreme W&M Smatt|White|0.9L": 176300, "Majestic Supreme W&M Smatt|White|5L": 879500, "Majestic Supreme W&M Smatt|Base A|0.9L": 167800, "Majestic Supreme W&M Smatt|Base A|5L": 836500, "Majestic Supreme W&M Smatt|Base B|0.9L": 147000, "Majestic Supreme W&M Smatt|Base B|5L": 731700, "Majestic Supreme W&M Smatt|Base C|0.9L": 138400, "Majestic Supreme W&M Smatt|Base C|5L": 691400, "Citoprimer 09||2.5L": 318400, "Citoprimer 09||20L": 2487600, "Ultra Primer||2.5L": 261300, "Ultra Primer||20L": 1979800, "Gardex Primer / Zinc Phosphate||1L": 104200, "Gardex Primer / Zinc Phosphate||5L": 556700, "Jotashield Primer||2.5L": 193500, "Jotashield Primer||20L": 1471300, "Majestic Primer (Walls)||2.5L": 181650, "Majestic Primer (Walls)||20L": 1351100, "Majestic Primer Wood & Trims||1L": 107400, "Majestic Primer Wood & Trims||5L": 486700, "Tough Shield Primer||3.5L": 228400, "Tough Shield Primer||18L": 1064200, "Essence Easy Primer||3.5L": 216900, "Essence Easy Primer||18L": 1010800, "Jotaplast Primer||3.5L": 153100, "Jotaplast Primer||18L": 677900, "Gardex Thinner||1L": 84000, "Gardex Thinner||5L": 382700, "Thinner No.7||1L": 85000, "Thinner No.7||5L": 389850};
+const ORIG = JSON.parse(JSON.stringify(DATA));
+let priceDate = 0;
+function setDate(d) {
+  priceDate = d;
+  for (const [ck, c] of Object.entries(DATA)) {
+    if (!c.products) continue;
+    c.products.forEach((p, pi) => p.variants.forEach((v, vi) => {
+      for (const s in v.prices) {
+        const o = ORIG[ck].products[pi].variants[vi].prices[s];
+        const k = `${p.name}|${v.name}|${s}`;
+        v.prices[s] = (d && DEC[k]) ? DEC[k] : o;
+      }
+    }));
+  }
+  document.getElementById('d-now').classList.toggle('active', d === 0);
+  document.getElementById('d-dec').classList.toggle('active', d === 1);
+  document.getElementById('hdr-sub').textContent = 'Jotun Decorative · Effective ' + (d ? '1 Dec 2026' : '24 Oct 2026');
+  document.getElementById('ref-no').textContent = 'Ref: ' + (d ? '3195/JILD/1126/JVSMKS' : '2809/JILD/1026/JVSMKS');
+  renderAll(); applyFilters();
+}
+setDate(new Date() >= new Date(2026, 11, 1) ? 1 : 0);
 </script>
 </body>
 </html>
