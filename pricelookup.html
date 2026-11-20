@@ -83,17 +83,6 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 90px; }
 .chips { display: flex; gap: 6px; margin: 10px 0 4px; flex-wrap: wrap; }
 .chip { padding: 7px 13px; border-radius: 16px; border: 1px solid var(--border2); background: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
 .chip.clear { color: #991B1B; border-color: #F0C8C8; margin-left: auto; }
-.cat-link { font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 10px 0 8px; text-decoration: underline; }
-.disc-panel { display: none; }
-.disc-panel.open { display: block; }
-.disc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 8px; }
-.disc-cell { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #F0E0C0; border-radius: 8px; padding: 6px 9px; }
-.disc-cell label { font-size: 11.5px; color: var(--muted); flex: 1; font-weight: 500; }
-.disc-cell input { width: 46px; border: none; background: transparent; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); text-align: right; padding: 0; }
-.disc-cell input:focus { outline: none; }
-.disc-cell input::-webkit-outer-spin-button, .disc-cell input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.disc-cell span { font-size: 12px; color: var(--muted); }
-.disc-hint { font-size: 10.5px; color: #92400E; margin-top: 9px; line-height: 1.5; }
 .price-was { font-size: 10.5px; color: var(--dim); text-decoration: line-through; font-family: 'Space Grotesk', sans-serif; font-weight: 400; }
 .pack-price.net, .tinter-price.net { color: #166534; }
 .net-flag { display: inline-block; font-size: 8.5px; font-weight: 700; color: #92400E; letter-spacing: 0.3px; margin-left: 4px; vertical-align: middle; }
@@ -135,11 +124,6 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 90px; }
     <button class="chip" onclick="setMaster(20,true)">20%</button>
     <button class="chip clear" onclick="clearDisc()">Hapus</button>
   </div>
-  <button class="cat-link" id="cat-link" onclick="toggleDisc()">Atur per kategori ▸</button>
-  <div class="disc-panel" id="disc-panel">
-    <div class="disc-grid" id="disc-grid"></div>
-    <div class="disc-hint">Kosong = ikut diskon semua produk. Harga net hijau, harga list dicoret. Reset setiap halaman dibuka.</div>
-  </div>
 </div>
 
 <main>
@@ -151,45 +135,28 @@ main { max-width: 700px; margin: 0 auto; padding: 16px 16px 90px; }
 <script>
 const fmt = n => n ? n.toLocaleString('id-ID') : '—';
 
-// Discount: one master % for everything, optional per-category override. Not persisted - resets on every open.
+// One discount % for all products. Not persisted - resets on every open.
 let MASTER = 0;
-const OVR = { exterior:null, interior:null, oldstock:null, wm:null, primer:null, thinner:null, tinter:null };
-const DISC_LABELS = { exterior:'Exterior', interior:'Interior', oldstock:'Old Stock', wm:'W&M', primer:'Primer', thinner:'Thinner', tinter:'Tinter' };
-function discOf(cat) { return OVR[cat] !== null && OVR[cat] !== undefined ? OVR[cat] : MASTER; }
-function net(price, cat) {
-  const d = discOf(cat);
-  if (!price || !d) return null;
-  return price * (1 - d / 100);
+function net(price) {
+  if (!price || !MASTER) return null;
+  return price * (1 - MASTER / 100);
 }
 function priceCell(price, cat, cls) {
   if (!price) return `<div class="${cls} empty">—</div>`;
-  const n = net(price, cat);
+  const n = net(price);
   if (n === null) return `<div class="${cls}">${fmt(price)}</div>`;
   return `<div class="price-was">${fmt(price)}</div><div class="${cls} net">${fmt(Math.round(n))}</div>`;
 }
-function clampPct(val) { let v = parseFloat(val); if (isNaN(v) || v < 0) v = 0; if (v > 100) v = 100; return v; }
-function buildDiscGrid() {
-  document.getElementById('disc-grid').innerHTML = Object.keys(DISC_LABELS).map(k =>
-    `<div class="disc-cell"><label>${DISC_LABELS[k]}</label><input type="number" id="d-${k}" min="0" max="100" step="0.5" placeholder="${MASTER||0}" value="${OVR[k]===null?'':OVR[k]}" oninput="setDisc('${k}',this.value)"><span>%</span></div>`
-  ).join('');
-}
-function refresh() { renderAll(); applyFilters(); updDiscBar(); }
 function setMaster(val, fromChip) {
-  MASTER = clampPct(val);
+  let v = parseFloat(val); if (isNaN(v) || v < 0) v = 0; if (v > 100) v = 100;
+  MASTER = v;
   if (fromChip) document.getElementById('d-master').value = MASTER || '';
-  Object.keys(DISC_LABELS).forEach(k => { const el = document.getElementById('d-' + k); if (el) el.placeholder = MASTER || 0; });
-  refresh();
-}
-function setDisc(cat, val) {
-  OVR[cat] = (val === '' || val === null) ? null : clampPct(val);
-  refresh();
+  renderAll(); applyFilters(); updDiscBar();
 }
 function updDiscBar() {
   const fab = document.getElementById('disc-fab');
-  const over = Object.keys(OVR).filter(k => OVR[k] !== null);
-  if (!MASTER && !over.some(k => OVR[k] > 0)) { fab.textContent = '% Diskon'; fab.classList.remove('on'); return; }
-  fab.textContent = (MASTER ? '−' + MASTER + '%' : 'Diskon') + (over.length ? ' · ' + over.length + ' kategori' : '');
-  fab.classList.add('on');
+  fab.textContent = MASTER ? '−' + MASTER + '%' : '% Diskon';
+  fab.classList.toggle('on', !!MASTER);
 }
 function openSheet() {
   document.getElementById('disc-sheet').classList.add('open');
@@ -199,15 +166,9 @@ function closeSheet() {
   document.getElementById('disc-sheet').classList.remove('open');
   document.getElementById('disc-backdrop').classList.remove('open');
 }
-function toggleDisc() {
-  const p = document.getElementById('disc-panel');
-  p.classList.toggle('open');
-  document.getElementById('cat-link').textContent = p.classList.contains('open') ? 'Atur per kategori ▾' : 'Atur per kategori ▸';
-}
 function clearDisc() {
-  MASTER = 0; Object.keys(OVR).forEach(k => OVR[k] = null);
-  document.getElementById('d-master').value = '';
-  buildDiscGrid(); refresh();
+  MASTER = 0; document.getElementById('d-master').value = '';
+  renderAll(); applyFilters(); updDiscBar();
 }
 
 const DATA = {
@@ -505,7 +466,6 @@ function applyFilters() {
   document.getElementById('empty-search').style.display = anyVisible ? 'none' : 'block';
 }
 
-buildDiscGrid();
 renderAll();
 </script>
 </body>
